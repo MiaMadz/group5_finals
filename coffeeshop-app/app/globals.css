@@ -381,6 +381,36 @@ select {
   justify-content: space-between;
   gap: 12px;
   align-items: flex-start;
+  position: relative;
+}
+
+.favorite-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.favorite-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.favorite-toggle.active {
+  color: var(--accent);
+  background: rgba(217, 180, 74, 0.18);
+  border-color: rgba(217, 180, 74, 0.3);
+}
+
+.heart-icon {
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .brewery-card h3 {
@@ -403,6 +433,18 @@ select {
   margin: 0;
   color: var(--muted);
   line-height: 1.6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.location-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 1rem;
 }
 
 .brewery-card__actions {

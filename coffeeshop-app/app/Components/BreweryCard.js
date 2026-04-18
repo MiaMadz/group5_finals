@@ -23,22 +23,26 @@ export default function BreweryCard({ brewery }) {
                     <h3>{brewery.name}</h3>
                     <span className="brewery-type-pill">{brewery.brewery_type || 'Unknown'}</span>
                 </div>
+                <button
+                    type="button"
+                    className={`favorite-toggle ${isFavorited ? 'active' : ''}`}
+                    onClick={() => dispatch(toggleFavorite(brewery))}
+                    aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                    <span className="heart-icon">{isFavorited ? '♥' : '♡'}</span>
+                </button>
             </div>
 
-            <p className="brewery-address">{address || `${brewery.city}, ${brewery.state_province}`}</p>
+            <p className="brewery-address">
+                <span className="location-icon">📍</span>
+                {address || `${brewery.city}, ${brewery.state_province}`}
+            </p>
 
             <div className="brewery-card__actions">
                 {brewery.website_url && (
                     <a className="btn btn-secondary" href={brewery.website_url} target="_blank" rel="noreferrer">Website</a>
                 )}
                 <a className="btn btn-secondary" href={directionsUrl} target="_blank" rel="noreferrer">Directions</a>
-                <button
-                    type="button"
-                    className={`btn btn-favorite ${isFavorited ? 'active' : ''}`}
-                    onClick={() => dispatch(toggleFavorite(brewery))}
-                >
-                    {isFavorited ? '★ Unfavorite' : '☆ Favorite'}
-                </button>
             </div>
         </li>
     )
