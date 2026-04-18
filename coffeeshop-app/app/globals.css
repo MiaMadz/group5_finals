@@ -163,6 +163,13 @@ select {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--foreground);
+}
+
 .btn-favorite {
   background: rgba(217, 180, 74, 0.08);
   color: var(--foreground);
