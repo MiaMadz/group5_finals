@@ -1,5 +1,6 @@
 import './globals.css'
 import Providers from './Components/Providers'
+import Navbar from './Components/NavBar'
  
 export const metadata = {
     title: 'Brewery Finder',
@@ -11,6 +12,7 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body>
                 <Providers>
+                    <Navbar />
                     {children}
                 </Providers>
             </body>
