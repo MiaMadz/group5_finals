@@ -34,7 +34,11 @@ export default function BreweryCard({ brewery }) {
             </div>
 
             <p className="brewery-address">
-                <span className="location-icon">📍</span>
+                <span className="location-icon" aria-hidden="true">
+                    <svg width="18" height="24" viewBox="0 0 18 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 0C4.03 0 0 4.03 0 9C0 15.75 9 24 9 24C9 24 18 15.75 18 9C18 4.03 13.97 0 9 0ZM9 12.6C7.16 12.6 5.7 11.14 5.7 9.3C5.7 7.46 7.16 6 9 6C10.84 6 12.3 7.46 12.3 9.3C12.3 11.14 10.84 12.6 9 12.6Z" fill="#FBC02D"/>
+                    </svg>
+                </span>
                 {address || `${brewery.city}, ${brewery.state_province}`}
             </p>
 
