@@ -88,8 +88,8 @@ export default function ExplorePage() {
                         <div className="panel-meta">
                             <div>
                                 <h2>Brewery results</h2>
-                                <p className="meta-copy">{displayedBreweries.length} locations</p>
                             </div>
+                            <p className="meta-copy">{displayedBreweries.length} locations</p>
                         </div>
 
                         <div className="brewery-list-wrapper">
