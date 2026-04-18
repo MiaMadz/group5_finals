@@ -56,22 +56,37 @@ const STATES = [
     'Wyoming'
 ]
 
-export default function Filters({ city, state, type, onCityChange, onStateChange, onTypeChange }) {
+export default function Filters({ state, type, onStateChange, onTypeChange }) {
     return (
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            <input type="text" placeholder="Filter by city" value={city} onChange={(e) => onCityChange(e.target.value)} style={{ padding: '8px' }}/>
-            <select value={state} onChange={(e) => onStateChange(e.target.value)} style={{ padding: '8px' }}>
-                <option value="">All States</option>
-                {STATES.map(s => (
-                    <option key={s} value={s.toLowerCase()}>{s}</option>
-                ))}
-            </select>
-            <select value={type} onChange={(e) => onTypeChange(e.target.value)} style={{ padding: '8px' }}>
-                <option value="">All Types</option>
-                {BREWERY_TYPES.map(t => (
-                    <option key={t} value={t}>{t}</option>
-                ))}
-            </select>
+        <div className="filters-row filters-row--compact">
+            <div className="filter-control">
+                <label className="screen-reader-text" htmlFor="type-filter">Type</label>
+                <select
+                    id="type-filter"
+                    className="select-input"
+                    value={type}
+                    onChange={(e) => onTypeChange(e.target.value)}
+                >
+                    <option value="">Filter by type</option>
+                    {BREWERY_TYPES.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                    ))}
+                </select>
+            </div>
+            <div className="filter-control">
+                <label className="screen-reader-text" htmlFor="state-filter">State</label>
+                <select
+                    id="state-filter"
+                    className="select-input"
+                    value={state}
+                    onChange={(e) => onStateChange(e.target.value)}
+                >
+                    <option value="">Filter by state</option>
+                    {STATES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                    ))}
+                </select>
+            </div>
         </div>
     )
 }

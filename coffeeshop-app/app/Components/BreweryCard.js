@@ -8,16 +8,35 @@ export default function BreweryCard({ brewery }) {
         state.favorites.items.some(b => b.id === brewery.id)
     )
 
+    const address = [brewery.street, brewery.city, brewery.state_province]
+        .filter(Boolean)
+        .join(', ')
+
+    const directionsUrl = brewery.latitude && brewery.longitude
+        ? `https://www.google.com/maps/search/?api=1&query=${brewery.latitude},${brewery.longitude}`
+        : `https://www.google.com/maps/search/${encodeURIComponent(address)}`
+
     return (
-        <li style={{ border: '1px solid #ddd', padding: '12px', marginBottom: '8px', borderRadius: '4px' }}>
-            <strong>{brewery.name}</strong>
-            <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.85em' }}>({brewery.brewery_type})</span>
-            <p style={{ margin: '4px 0' }}>{brewery.city}, {brewery.state_province} · {brewery.country}</p>
-            {brewery.website_url && (
-                <a href={brewery.website_url} target="" rel="">Website</a>
-            )}
-            <div style={{ marginTop: '8px' }}>
-                <button onClick={() => dispatch(toggleFavorite(brewery))}>
+        <li className="brewery-card">
+            <div className="brewery-card__header">
+                <div>
+                    <h3>{brewery.name}</h3>
+                    <span className="brewery-type-pill">{brewery.brewery_type || 'Unknown'}</span>
+                </div>
+            </div>
+
+            <p className="brewery-address">{address || `${brewery.city}, ${brewery.state_province}`}</p>
+
+            <div className="brewery-card__actions">
+                {brewery.website_url && (
+                    <a className="btn btn-secondary" href={brewery.website_url} target="_blank" rel="noreferrer">Website</a>
+                )}
+                <a className="btn btn-secondary" href={directionsUrl} target="_blank" rel="noreferrer">Directions</a>
+                <button
+                    type="button"
+                    className={`btn btn-favorite ${isFavorited ? 'active' : ''}`}
+                    onClick={() => dispatch(toggleFavorite(brewery))}
+                >
                     {isFavorited ? '★ Unfavorite' : '☆ Favorite'}
                 </button>
             </div>
