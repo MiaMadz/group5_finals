@@ -4,6 +4,7 @@ const BREWERY_TYPES = ['micro', 'nano', 'regional', 'brewpub', 'large', 'plannin
 const COUNTRIES = [
     'United States',
     'Australia',
+    'Canada',
     'South Africa',
     'Ireland',
     'England',
