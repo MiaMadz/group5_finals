@@ -14,15 +14,17 @@ export default function Navbar() {
 
     const navLink = (to, label) => (
         <Link href={to} style={{
-            fontSize: '18px',
-            fontWeight: pathname === to ? '700' : '400',
+            fontSize: '20px', // Slightly larger for better match
+            fontWeight: pathname === to ? '700' : '500', // Medium weight for better readability
             color: pathname === to ? '#E8A94D' : '#f0f0f0',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            transition: 'color 0.2s ease',
-            fontFamily: "'Playfair Display', serif",
+            transition: 'all 0.3s ease',
+            // LOGO FONT SYNC:
+            fontFamily: "'Playfair Display', serif", 
+            letterSpacing: '0.5px', // Adds that premium logo feel
             borderBottom: pathname === to ? '2px solid #C9782A' : '2px solid transparent',
             paddingBottom: '2px',
         }}>
@@ -46,24 +48,19 @@ export default function Navbar() {
             textDecoration: 'none',
             display: 'inline-flex',
             alignItems: 'center',
-            fontSize: '60px'
+            transition: 'transform 0.3s ease',
+            transform: 'scale(1.35)', // Slightly bigger as requested
+            transformOrigin: 'left center',
         },
         logoImage: {
             display: 'block',
             width: '160px',
             height: 'auto',
         },
-        centerLinks: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '40px',
-        },
-        rightIcons: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: '25px',
-            borderLeft: '1px solid rgba(201, 120, 42, 0.3)',
-            paddingLeft: '25px',
+        rightSection: {
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '40px' // Increased gap for the slightly larger font
         }
     }
 
@@ -73,24 +70,29 @@ export default function Navbar() {
                 <img src="/images/logo.png" alt="SipSync" style={styles.logoImage} />
             </Link>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+            <div style={styles.rightSection}>
                 {navLink('/Home', 'Home')}
                 {navLink('/Explore', 'Explore')}
 
-                <Link href="/Favorite" style={{ position: 'relative', color: '#F5EFE6' }}>
-                    <Heart size={24} strokeWidth={1.2} />
+                <Link href="/Favorite" style={{ 
+                    position: 'relative', 
+                    color: '#F5EFE6',
+                    transition: 'transform 0.2s ease',
+                    display: 'flex'
+                }}>
+                    <Heart size={28} strokeWidth={1.2} />
                     {mounted && favorites.length > 0 && (
                         <span style={{
                             position: 'absolute',
                             top: '-8px',
-                            right: '-8px',
+                            right: '-10px',
                             background: '#C9782A',
                             color: '#1C0F0A',
-                            fontSize: '10px',
+                            fontSize: '11px',
                             fontWeight: '700',
                             borderRadius: '50%',
-                            width: '18px',
-                            height: '18px',
+                            width: '20px',
+                            height: '20px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
