@@ -1,62 +1,26 @@
 'use client'
 
 const BREWERY_TYPES = ['micro', 'nano', 'regional', 'brewpub', 'large', 'planning', 'bar', 'contract', 'proprietor', 'taproom']
-const STATES = [
-    'Alaska',
-    'Alabama',
-    'Arkansas',
-    'Arizona',
-    'California',
-    'Colorado',
-    'Connecticut',
-    'District of Columbia',
-    'Delaware',
-    'Florida',
-    'Georgia',
-    'Hawaii',
-    'Iowa',
-    'Illinois',
-    'Indiana',
-    'Kansas',
-    'Kentucky',
-    'Louisiana',
-    'Massachusetts',
-    'Maryland',
-    'Maine',
-    'Michigan',
-    'Minnesota',
-    'Missouri',
-    'Mississippi',
-    'Montana',
-    'North Carolina',
-    'North Dakota',
-    'Nebraska',
-    'New Hampshire',
-    'New Jersey',
-    'New Mexico',
-    'Nevada',
-    'New York',
-    'Ohio',
-    'Oklahoma',
-    'Oregon',
-    'Pennsylvania',
-    'Puerto Rico',
-    'Rhode Island',
-    'South Carolina',
-    'South Dakota',
-    'Tennessee',
-    'Texas',
-    'Utah',
-    'Virginia',
-    'Virgin Islands',
-    'Vermont',
-    'Washington',
-    'Wisconsin',
-    'West Virginia',
-    'Wyoming'
+const COUNTRIES = [
+    'United States',
+    'Australia',
+    'South Africa',
+    'Ireland',
+    'England',
+    'South Korea',
+    'Poland',
+    'Singapore',
+    'Austria',
+    'Portugal',
+    'Japan',
+    'Germany',
+    'Sweden',
+    'Scotland',
+    'Italy',
+    'France'
 ]
 
-export default function Filters({ state, type, onStateChange, onTypeChange }) {
+export default function Filters({ country, type, onCountryChange, onTypeChange }) {
     return (
         <div className="filters-row filters-row--compact">
             <div className="filter-control">
@@ -74,16 +38,16 @@ export default function Filters({ state, type, onStateChange, onTypeChange }) {
                 </select>
             </div>
             <div className="filter-control">
-                <label className="screen-reader-text" htmlFor="state-filter">State</label>
+                <label className="screen-reader-text" htmlFor="country-filter">Country</label>
                 <select
-                    id="state-filter"
+                    id="country-filter"
                     className="select-input"
-                    value={state}
-                    onChange={(e) => onStateChange(e.target.value)}
+                    value={country}
+                    onChange={(e) => onCountryChange(e.target.value)}
                 >
-                    <option value="">Filter by state</option>
-                    {STATES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
+                    <option value="">Filter by country</option>
+                    {COUNTRIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
                     ))}
                 </select>
             </div>

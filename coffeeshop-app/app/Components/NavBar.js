@@ -1,144 +1,105 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useSelector } from 'react-redux'
 import { useState, useEffect } from 'react'
-import { Heart, Search, MapPin } from 'lucide-react'
+import { Heart } from 'lucide-react'
 
 export default function Navbar() {
     const pathname = usePathname()
-    const router = useRouter()
     const [mounted, setMounted] = useState(false)
-    const [isOpen, setIsOpen] = useState(false)
-    const [searchQuery, setSearchQuery] = useState('')
-
-    const favorites = useSelector((state) => state.favorites?.favorites || [])
-
+    const favorites = useSelector((state) => state.favorites?.items || [])
     useEffect(() => { setMounted(true) }, [])
 
-    const handleSearchChange = (e) => {
-        const value = e.target.value
-        setSearchQuery(value)
-        router.push(`/Explore?search=${encodeURIComponent(value)}`)
-    }
-
-    const navLink = (to, label, icon = null) => (
+    const navLink = (to, label) => (
         <Link href={to} style={{
-            fontSize: '23px',
-            fontWeight: '400',
-            color: pathname === to ? '#ffffff' : '#f0f0f0',
+            fontSize: '18px',
+            fontWeight: pathname === to ? '700' : '400',
+            color: pathname === to ? '#E8A94D' : '#f0f0f0',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            transition: 'opacity 0.3s ease',
+            transition: 'color 0.2s ease',
             fontFamily: "'Playfair Display', serif",
+            borderBottom: pathname === to ? '2px solid #C9782A' : '2px solid transparent',
+            paddingBottom: '2px',
         }}>
-            {icon}
             {label}
         </Link>
     )
 
     const styles = {
         nav: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '30px 80px',
-            background: 'linear-gradient(to bottom, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0.9) 100%)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
             position: 'sticky',
             top: 0,
             zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '20px 80px',
+            background: '#1C0F0A',
+            borderBottom: '1px solid rgba(201, 120, 42, 0.25)',
         },
         logo: {
             textDecoration: 'none',
-            color: '#fff',
-            fontSize: '42px',
-            fontWeight: '900',
-            fontFamily: "'Playfair Display', serif",
-            letterSpacing: '-1px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            fontSize: '60px'
+        },
+        logoImage: {
+            display: 'block',
+            width: '160px',
+            height: 'auto',
         },
         centerLinks: {
             display: 'flex',
             alignItems: 'center',
-            gap: '50px',
+            gap: '40px',
         },
         rightIcons: {
             display: 'flex',
             alignItems: 'center',
             gap: '25px',
-            borderLeft: '1px solid rgba(255, 255, 255, 0.3)',
+            borderLeft: '1px solid rgba(201, 120, 42, 0.3)',
             paddingLeft: '25px',
         }
     }
 
     return (
         <nav style={styles.nav}>
-            <Link href="/" style={styles.logo}>
-                SIPSYNC
+            <Link href="/Home" style={styles.logo}>
+                <img src="/images/logo.png" alt="SipSync" style={styles.logoImage} />
             </Link>
 
-            <div style={styles.centerLinks}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
                 {navLink('/Home', 'Home')}
                 {navLink('/Explore', 'Explore')}
-                {navLink('/Brewery', 'Near Me', <MapPin size={18} />)}
-                {/* About Us link removed */}
-            </div>
 
-            <div style={styles.rightIcons}>
-                <Link href="/Favorite" style={{ position: 'relative', color: '#fff' }}>
+                <Link href="/Favorite" style={{ position: 'relative', color: '#F5EFE6' }}>
                     <Heart size={24} strokeWidth={1.2} />
                     {mounted && favorites.length > 0 && (
                         <span style={{
                             position: 'absolute',
                             top: '-8px',
                             right: '-8px',
-                            background: '#7ABA30',
-                            color: '#fff',
+                            background: '#C9782A',
+                            color: '#1C0F0A',
                             fontSize: '10px',
+                            fontWeight: '700',
                             borderRadius: '50%',
                             width: '18px',
                             height: '18px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontFamily: 'sans-serif'
+                            fontFamily: 'sans-serif',
                         }}>
                             {favorites.length}
                         </span>
                     )}
                 </Link>
-
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <button
-                        onClick={() => setIsOpen(!isOpen)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff' }}
-                    >
-                        <Search size={24} strokeWidth={1.2} />
-                    </button>
-                    {isOpen && (
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                            autoFocus
-                            style={{
-                                border: 'none',
-                                borderBottom: '1px solid #fff',
-                                outline: 'none',
-                                background: 'transparent',
-                                color: '#fff',
-                                marginLeft: '10px',
-                                width: '150px',
-                                fontSize: '16px',
-                                fontFamily: "'Playfair Display', serif"
-                            }}
-                        />
-                    )}
-                </div>
             </div>
         </nav>
     )

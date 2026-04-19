@@ -1,185 +1,154 @@
 'use client';
 import Link from 'next/link';
-import { useSearchBreweriesQuery } from '../rtk/breweryApi';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSearchBreweriesQuery, useGetBreweryCountQuery } from '../rtk/breweryApi';
+import { toggleFavorite } from '../rtk/favoritesSlice';
 
 const COUNTRIES = [
-  'United States',
-  'Canada'
-];
+  'United States', 'Canada', 'England', 'Ireland', 'Scotland',
+  'Wales', 'Australia', 'New Zealand', 'South Korea', 'Poland',
+  'Portugal', 'Isle of Man', 'Austria', 'France', 'Singapore',
+  'Belgium', 'Germany', 'Israel', 'Netherlands', 'Spain'];
+const BREWERY_TYPES = ['micro', 'nano', 'regional', 'brewpub', 'large', 'planning', 'bar', 'contract', 'proprietor', 'taproom', 'closed'];
 
 export default function HomePage() {
+  const dispatch = useDispatch();
+  const favorites = useSelector((state) => state.favorites.items || []);
+  const { data: totalMeta } = useGetBreweryCountQuery();
+  const totalBreweries = Number(totalMeta?.total) || 0;
 
-  const handleCoffeeScroll = (direction, countryIndex) => {
+  const handleScroll = (direction, countryIndex) => {
     const element = document.getElementById(`carousel-${countryIndex}`);
-    const scrollAmount = 320;
-
     if (element) {
-      element.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
+      element.scrollBy({ left: direction === 'left' ? -320 : 320, behavior: 'smooth' });
     }
   };
 
   return (
-    <main
-      style={{
-        backgroundImage: 'linear-gradient(to bottom, #2C1E1A, #F8F5F2)'
-      }}
-    >
-      <section 
-        className="relative text-white min-h-screen flex items-center overflow-hidden"
-        style={{
-          backgroundImage: 'url(/images/home_bg.png)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40"></div>
-
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10 flex justify-start">
-          <div className="max-w-3xl text-left translate-x-[-120px] lg:translate-x-[-200px]">
-
-            <p className="text-sm font-bold tracking-widest text-amber-300 uppercase mb-6">
-              Welcome to SipSync
-            </p>
-
-            <h1 className="text-6xl lg:text-7xl font-black leading-tight mb-6 text-white drop-shadow-lg">
-              Discover the World's Best Breweries
-            </h1>
-
-            <div className="text-lg lg:text-xl text-gray-200 leading-relaxed mb-8 max-w-2xl">
-              <p>Explore craft breweries and coffee houses across countries.</p>
-              <p className="mt-2">Find your next favorite spot or discover hidden gems.</p>
+    <div className="sipsync-home">
+      <section className="hero">
+        <div className="hero__bg" />
+        <div className="hero__grain" />
+        <div className="hero__content">
+          <div className="hero__left">
+            <div className="hero__eyebrow">
+              <div className="hero__eyebrow-line" />
+              <span className="hero__eyebrow-text">Welcome to SipSync</span>
             </div>
-
+            <h1 className="hero__title">
+              Discover the World's <em>Best</em> Breweries
+            </h1>
+            <p className="hero__body">
+              Explore craft breweries and coffee houses across countries.
+              Find your next favorite spot or discover hidden gems.
+            </p>
+            <div className="hero__cta-group">
+              <Link href="/Explore" className="btn-primary">Start Exploring →</Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {COUNTRIES.map((country, index) => (
+      <div className="hero__right">
+        <div className="hero__stat-stack">
+          <div className="hero__stat">
+            <div className="hero__stat-num">{totalBreweries.toLocaleString()}</div>
+            <div className="hero__stat-label">Breweries listed</div>
+          </div>
+          <div className="hero__stat">
+            <div className="hero__stat-num">{COUNTRIES.length}</div>
+            <div className="hero__stat-label">Countries covered</div>
+          </div>
+          <div className="hero__stat">
+            <div className="hero__stat-num">{BREWERY_TYPES.length}</div>
+            <div className="hero__stat-label">Brewery types</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="breweries">
         <CountrySection
-          key={country}
-          country={country}
-          index={index}
-          handleScroll={handleCoffeeScroll}
+          country={COUNTRIES[0]}
+          index={0}
+          handleScroll={handleScroll}
+          favorites={favorites}
+          onToggleFavorite={(brewery) => dispatch(toggleFavorite(brewery))}
         />
-      ))}
+
+        <div className="country-divider">
+          <div className="country-divider__line" />
+          <span className="country-divider__label">More countries</span>
+          <div className="country-divider__line" />
+        </div>
+
+        <CountrySection
+          country={COUNTRIES[1]}
+          index={1}
+          handleScroll={handleScroll}
+          favorites={favorites}
+          onToggleFavorite={(brewery) => dispatch(toggleFavorite(brewery))}
+        />
+      </div>
 
       <Footer />
-
-    </main>
+    </div>
   );
 }
 
-function CountrySection({ country, index, handleScroll }) {
-
-  const { data: breweriesData, isLoading } = useSearchBreweriesQuery({
-    country,
-    perPage: 50
-  });
+function CountrySection({ country, index, handleScroll, favorites, onToggleFavorite }) {
+  const { data: breweriesData, isLoading } = useSearchBreweriesQuery({ country, perPage: 50 });
 
   if (isLoading || !breweriesData?.length) return null;
 
-  const backgroundImageUrl = `/images/${country.toLowerCase().replace(/\s+/g, '_')}_bg.png`;
+  const bgUrl = `/images/${country.toLowerCase().replace(/\s+/g, '_')}_bg.png`;
 
   return (
-    <section
-      className="py-24 border-b border-white/10"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${backgroundImageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
-        <div className="mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-1 w-12 bg-gradient-to-r from-amber-500 to-orange-500"></div>
-            <span className="text-amber-300 font-bold text-sm uppercase">
+    <section className="country-section">
+      <div className="country-section__bg" style={{ backgroundImage: `url(${bgUrl})` }} />
+      <div className="country-section__inner">
+        <div className="country-section__header">
+          <div>
+            <div className="country-section__tag">
+              <div className="country-section__tag-line" />
               Breweries
-            </span>
+            </div>
+            <h2 className="country-section__title">{country}</h2>
+            <div className="country-section__subtitle">Explore breweries from {country}</div>
           </div>
-
-          <h2 className="text-4xl lg:text-5xl font-black mb-2 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
-            {country}
-          </h2>
-
-          <p className="text-gray-300 text-lg">
-            Explore breweries from {country}
-          </p>
         </div>
 
-        <div className="relative px-10">
-
-          <button 
-            onClick={() => handleScroll('left', index)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 
-                       w-12 h-12 rounded-full 
-                       bg-white/80 backdrop-blur
-                       flex items-center justify-center
-                       shadow-md
-                       hover:bg-amber-400 hover:text-white hover:scale-110 transition"
-          >
-            ‹
-          </button>
-
-          <div 
-            id={`carousel-${index}`}
-            className="flex gap-6 overflow-x-auto scroll-smooth pb-6 snap-x snap-mandatory"
-          >
-            {breweriesData.map((brewery) => (
-              <div key={brewery.id} className="flex-shrink-0 w-[280px] snap-start">
-                <div className="rounded-2xl border border-white/10 flex flex-col h-[280px]
-                                bg-gradient-to-br from-[#3E2A24] via-[#5A3E36] to-[#7B5E57]
-                                shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                  <div className="p-6 flex flex-col justify-between h-full">
-                    <div className="flex items-start justify-between gap-3 mb-2 min-h-[48px]">
-                      <h3 className="font-black text-lg text-white line-clamp-2">
-                        {brewery.name}
-                      </h3>
-                      <button className="bg-white/90 rounded-full p-2 hover:scale-110 transition"> ❤️ </button>
-                    </div>
-
-                    <p className="text-sm text-amber-200 uppercase">
-                      {brewery.brewery_type || 'Brewery'}
-                    </p>
-
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm text-stone-200">
-                        {brewery.city}
-                      </span>
-                    </div>
-
-                    <Link 
-                      href={`/Brewery/${brewery.id}`}
-                      className="mt-4 text-center font-bold py-3 rounded-xl
-                                 bg-[#F3E5D8]
-                                 hover:bg-[#EAD3BE]
-                                 transition shadow-md"
+        <div className="carousel-wrap">
+          <button className="carousel-btn carousel-btn--left" onClick={() => handleScroll('left', index)} aria-label="Scroll left">‹</button>
+          <div id={`carousel-${index}`} className="carousel-track">
+            {breweriesData.map((brewery) => {
+              const isFav = favorites.some((f) => f.id === brewery.id);
+              return (
+                <div key={brewery.id} className="brew-card">
+                  <div className="brew-card__top">
+                    <span className="brew-card__name">{brewery.name}</span>
+                    <button
+                      className={`brew-card__fav${isFav ? ' active' : ''}`}
+                      onClick={() => onToggleFavorite(brewery)}
+                      aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                     >
-                      Find in Maps
-                    </Link>
+                      {isFav ? '♥' : '♡'}
+                    </button>
                   </div>
+                  <div className="brew-card__type">{brewery.brewery_type || 'Brewery'}</div>
+                  <div className="brew-card__city">
+                    <span className="location-icon" aria-hidden="true">
+                      <svg width="18" height="24" viewBox="0 0 18 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 0C4.03 0 0 4.03 0 9C0 15.75 9 24 9 24C9 24 18 15.75 18 9C18 4.03 13.97 0 9 0ZM9 12.6C7.16 12.6 5.7 11.14 5.7 9.3C5.7 7.46 7.16 6 9 6C10.84 6 12.3 7.46 12.3 9.3C12.3 11.14 10.84 12.6 9 12.6Z" fill="#FBC02D"/>
+                      </svg>
+                    </span>
+                    {brewery.city}{brewery.state_province ? `, ${brewery.state_province}` : ''}
+                  </div>
+                  <Link href={`/Brewery/${brewery.id}`} className="brew-card__link">View on map</Link>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-
-          <button 
-            onClick={() => handleScroll('right', index)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 
-                       w-12 h-12 rounded-full 
-                       bg-white/80 backdrop-blur
-                       flex items-center justify-center
-                       shadow-md
-                       hover:bg-amber-400 hover:text-white hover:scale-110 transition"
-          >
-            ›
-          </button>
-
+          <button className="carousel-btn carousel-btn--right" onClick={() => handleScroll('right', index)} aria-label="Scroll right">›</button>
         </div>
       </div>
     </section>
@@ -188,58 +157,22 @@ function CountrySection({ country, index, handleScroll }) {
 
 function Footer() {
   return (
-    <footer className="text-white">
-
-      <div
-        className="relative w-full py-10 md:py-12 flex items-center justify-center text-center overflow-hidden"
-        style={{
-          backgroundImage: "url('/images/footer_bg.png')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#1A1210]"></div>
-
-        <div className="relative z-10 mt-4 md:mt-2">
-          <h2 className="text-xl md:text-2xl font-semibold text-[#2C1E1A] mb-3 leading-snug">
-            Discover more and find the <br /> perfect spot for your next cup. 
-          </h2>
-
-          <Link
-            href="/Explore"
-            className="inline-block px-4 py-2 rounded-full text-xs text-white font-medium
-                       bg-[#3B2A24] hover:bg-[#2a1d18]
-                       transition duration-300 shadow-sm"
-          >
-            Explore More Brews →
-          </Link>
+    <footer className="footer">
+      <div className="footer__banner">
+        <div className="footer__banner-bg" />
+        <div className="footer__banner-content">
+          <h2 className="footer__banner-title">Discover more and find the<br/>perfect spot for your next cup.</h2>
+          <Link href="/Explore" className="btn-primary">Explore More Brews →</Link>
         </div>
       </div>
-
-      <div className="bg-[#1A1210]">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-3">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-2">
-            <div className="flex gap-4 order-2 md:order-1">
-              {['Privacy Policy', 'Terms of Service', 'Contact'].map((link) => (
-                <a
-                  key={link}
-                  href="#"
-                  className="text-gray-500 hover:text-amber-400 text-[11px] transition"
-                >
-                  {link}
-                </a>
-              ))}
-            </div>
-
-            <p className="text-gray-500 text-[11px] order-1 md:order-2">
-              © {new Date().getFullYear()} SipSync. All rights reserved.
-            </p>
-
-          </div>
+      <div className="footer__bottom">
+        <div className="footer__links">
+          {['Privacy Policy', 'Terms of Service', 'Contact'].map((label) => (
+            <a key={label} href="#" className="footer__link">{label}</a>
+          ))}
         </div>
+        <p className="footer__copy">© {new Date().getFullYear()} SipSync. All rights reserved.</p>
       </div>
-
     </footer>
   );
 }

@@ -2,7 +2,7 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleFavorite } from '../rtk/favoritesSlice'
 
-export default function BreweryCard({ brewery }) {
+export default function BreweryCard({ brewery, onSelect }) {
     const dispatch = useDispatch()
     const isFavorited = useSelector(state =>
         state.favorites.items.some(b => b.id === brewery.id)
@@ -17,7 +17,7 @@ export default function BreweryCard({ brewery }) {
         : `https://www.google.com/maps/search/${encodeURIComponent(address)}`
 
     return (
-        <li className="brewery-card">
+        <li className="brewery-card" onClick={onSelect} style={{ cursor: onSelect ? 'pointer' : 'default' }}>
             <div className="brewery-card__header">
                 <div>
                     <h3>{brewery.name}</h3>
@@ -26,7 +26,10 @@ export default function BreweryCard({ brewery }) {
                 <button
                     type="button"
                     className={`favorite-toggle ${isFavorited ? 'active' : ''}`}
-                    onClick={() => dispatch(toggleFavorite(brewery))}
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        dispatch(toggleFavorite(brewery))
+                    }}
                     aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
                 >
                     <span className="heart-icon">{isFavorited ? '♥' : '♡'}</span>
@@ -44,9 +47,9 @@ export default function BreweryCard({ brewery }) {
 
             <div className="brewery-card__actions">
                 {brewery.website_url && (
-                    <a className="btn btn-secondary" href={brewery.website_url} target="_blank" rel="noreferrer">Website</a>
+                    <a className="btn btn-secondary" href={brewery.website_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Website</a>
                 )}
-                <a className="btn btn-secondary" href={directionsUrl} target="_blank" rel="noreferrer">Directions</a>
+                <a className="btn btn-secondary" href={directionsUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Directions</a>
             </div>
         </li>
     )

@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import Filters from '../Components/Filters'
 import Pagination from '../Components/Pagination'
 import BreweryCard from '../Components/BreweryCard'
+import 'leaflet/dist/leaflet.css'
 
 const BreweryMap = dynamic(() => import('../Components/BreweryMap'), { ssr: false })
 
@@ -13,22 +14,32 @@ const PER_PAGE = 10
 
 export default function ExplorePage() {
     const [search, setSearch] = useState('')
-    const [state, setState] = useState('')
+    const [country, setCountry] = useState('')
     const [type, setType] = useState('')
     const [page, setPage] = useState(1)
+    const [selectedLocation, setSelectedLocation] = useState(null)
 
     const favorites = useSelector((state) => state.favorites?.items || [])
 
-    const filters = { name: search, state, type, page, perPage: PER_PAGE }
+    const filters = { name: search, country, type, page, perPage: PER_PAGE }
 
     const { data: breweries = [], isLoading, isError } = useSearchBreweriesQuery(filters)
-    const { data: meta } = useGetBreweryCountQuery({ name: search, state, type })
+    const { data: meta } = useGetBreweryCountQuery({ name: search, country, type })
 
     const totalPages = meta?.total ? Math.ceil(Number(meta.total) / PER_PAGE) : 1
 
     const handleFilterChange = (setter) => (value) => {
         setter(value)
         setPage(1)
+    }
+
+    const handleSelectBrewery = (brewery) => {
+        if (brewery?.latitude && brewery?.longitude) {
+            setSelectedLocation({
+                latitude: parseFloat(brewery.latitude),
+                longitude: parseFloat(brewery.longitude),
+            })
+        }
     }
 
     const displayedBreweries = breweries
@@ -38,7 +49,6 @@ export default function ExplorePage() {
         <div className="explore-page">
             <div className="explore-header">
                 <div>
-                    <div className="brand-label">KAPEKO</div>
                     <h1>Explore breweries</h1>
                     <p className="subtitle">Discover breweries, brewpubs, and taprooms with a map-focused layout.</p>
                 </div>
@@ -47,7 +57,6 @@ export default function ExplorePage() {
                         <span className="favorites-label">Favorites saved:</span>
                         <span className="favorites-number">{favorites.length}</span>
                     </div>
-                    <button className="btn btn-primary" type="button">Near Me</button>
                 </div>
             </div>
 
@@ -55,7 +64,7 @@ export default function ExplorePage() {
                 <aside className="map-panel">
                     <div className="panel-card panel-card--map">
                         {mappableBreweries.length > 0 ? (
-                            <BreweryMap breweries={mappableBreweries} />
+                            <BreweryMap breweries={mappableBreweries} selectedBrewery={selectedLocation} />
                         ) : (
                             <div className="empty-state">No breweries available for the map.</div>
                         )}
@@ -78,10 +87,10 @@ export default function ExplorePage() {
                             </div>
                         </div>
                         <div className="panel-card__controls">
-                            <Filters
-                                state={state}
+                                <Filters
+                                country={country}
                                 type={type}
-                                onStateChange={handleFilterChange(setState)}
+                                onCountryChange={handleFilterChange(setCountry)}
                                 onTypeChange={handleFilterChange(setType)}
                             />
                         </div>
@@ -95,7 +104,11 @@ export default function ExplorePage() {
                         <div className="brewery-list-wrapper">
                             <ul className="brewery-list">
                                 {displayedBreweries.map((brewery) => (
-                                    <BreweryCard key={brewery.id} brewery={brewery} />
+                                    <BreweryCard
+                                        key={brewery.id}
+                                        brewery={brewery}
+                                        onSelect={() => handleSelectBrewery(brewery)}
+                                    />
                                 ))}
                             </ul>
                         </div>
