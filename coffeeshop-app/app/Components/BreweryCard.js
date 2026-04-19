@@ -8,18 +8,45 @@ export default function BreweryCard({ brewery }) {
         state.favorites.items.some(b => b.id === brewery.id)
     )
 
+    const address = [brewery.street, brewery.city, brewery.state_province]
+        .filter(Boolean)
+        .join(', ')
+
+    const directionsUrl = brewery.latitude && brewery.longitude
+        ? `https://www.google.com/maps/search/?api=1&query=${brewery.latitude},${brewery.longitude}`
+        : `https://www.google.com/maps/search/${encodeURIComponent(address)}`
+
     return (
-        <li style={{ border: '1px solid #ddd', padding: '12px', marginBottom: '8px', borderRadius: '4px' }}>
-            <strong>{brewery.name}</strong>
-            <span style={{ marginLeft: '8px', color: '#666', fontSize: '0.85em' }}>({brewery.brewery_type})</span>
-            <p style={{ margin: '4px 0' }}>{brewery.city}, {brewery.state_province} · {brewery.country}</p>
-            {brewery.website_url && (
-                <a href={brewery.website_url} target="" rel="">Website</a>
-            )}
-            <div style={{ marginTop: '8px' }}>
-                <button onClick={() => dispatch(toggleFavorite(brewery))}>
-                    {isFavorited ? '★ Unfavorite' : '☆ Favorite'}
+        <li className="brewery-card">
+            <div className="brewery-card__header">
+                <div>
+                    <h3>{brewery.name}</h3>
+                    <span className="brewery-type-pill">{brewery.brewery_type || 'Unknown'}</span>
+                </div>
+                <button
+                    type="button"
+                    className={`favorite-toggle ${isFavorited ? 'active' : ''}`}
+                    onClick={() => dispatch(toggleFavorite(brewery))}
+                    aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                    <span className="heart-icon">{isFavorited ? '♥' : '♡'}</span>
                 </button>
+            </div>
+
+            <p className="brewery-address">
+                <span className="location-icon" aria-hidden="true">
+                    <svg width="18" height="24" viewBox="0 0 18 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 0C4.03 0 0 4.03 0 9C0 15.75 9 24 9 24C9 24 18 15.75 18 9C18 4.03 13.97 0 9 0ZM9 12.6C7.16 12.6 5.7 11.14 5.7 9.3C5.7 7.46 7.16 6 9 6C10.84 6 12.3 7.46 12.3 9.3C12.3 11.14 10.84 12.6 9 12.6Z" fill="#FBC02D"/>
+                    </svg>
+                </span>
+                {address || `${brewery.city}, ${brewery.state_province}`}
+            </p>
+
+            <div className="brewery-card__actions">
+                {brewery.website_url && (
+                    <a className="btn btn-secondary" href={brewery.website_url} target="_blank" rel="noreferrer">Website</a>
+                )}
+                <a className="btn btn-secondary" href={directionsUrl} target="_blank" rel="noreferrer">Directions</a>
             </div>
         </li>
     )

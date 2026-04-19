@@ -2,12 +2,20 @@
 
 export default function Pagination({ page, totalPages, onPageChange }) {
     return (
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '16px' }}>
-            <button onClick={() => onPageChange(page - 1)} disabled={page === 1}>
+        <div className="pagination-row">
+            <button
+                className="btn btn-secondary pagination-button"
+                onClick={() => onPageChange(page - 1)}
+                disabled={page === 1}
+            >
                 ← Prev
             </button>
-            <span>Page {page} of {totalPages}</span>
-            <button onClick={() => onPageChange(page + 1)} disabled={page === totalPages}>
+            <span className="pagination-info">Page {page} of {totalPages}</span>
+            <button
+                className="btn btn-secondary pagination-button"
+                onClick={() => onPageChange(page + 1)}
+                disabled={page === totalPages}
+            >
                 Next →
             </button>
         </div>

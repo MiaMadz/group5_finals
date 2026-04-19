@@ -12,92 +12,100 @@ const BreweryMap = dynamic(() => import('../Components/BreweryMap'), { ssr: fals
 const PER_PAGE = 10
 
 export default function ExplorePage() {
-    const favorites = useSelector(state => state.favorites.items)
+    const [search, setSearch] = useState('')
+    const [state, setState] = useState('')
+    const [type, setType] = useState('')
+    const [page, setPage] = useState(1)
 
-    const [nameInput, setNameInput] = useState('')
-    const [name, setName]           = useState('')
-    const [city, setCity]           = useState('')
-    const [state, setState]         = useState('')
-    const [type, setType]           = useState('')
-    const [page, setPage]           = useState(1)
-    const [showFavorites, setShowFavorites] = useState(false)
+    const favorites = useSelector((state) => state.favorites?.items || [])
 
-    const filters = { name, city, state, type, page, perPage: PER_PAGE }
+    const filters = { name: search, state, type, page, perPage: PER_PAGE }
 
     const { data: breweries = [], isLoading, isError } = useSearchBreweriesQuery(filters)
-    const { data: meta } = useGetBreweryCountQuery({ name, city, state, type })
+    const { data: meta } = useGetBreweryCountQuery({ name: search, state, type })
 
     const totalPages = meta?.total ? Math.ceil(Number(meta.total) / PER_PAGE) : 1
-
-    const handleSearch = (e) => {
-        e.preventDefault()
-        setName(nameInput)
-        setPage(1)
-    }
 
     const handleFilterChange = (setter) => (value) => {
         setter(value)
         setPage(1)
     }
 
-    const displayedBreweries = showFavorites ? favorites : breweries
-    const mappableBreweries = displayedBreweries.filter(b => b.latitude && b.longitude)
+    const displayedBreweries = breweries
+    const mappableBreweries = displayedBreweries.filter((b) => b.latitude && b.longitude)
 
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-            <h1>KAPEKO</h1>
-
-            <form onSubmit={handleSearch} style={{ marginBottom: '16px' }}>
-                <input
-                    type="text"
-                    placeholder="Search by name..."
-                    value={nameInput}
-                    onChange={(e) => setNameInput(e.target.value)}
-                    style={{ padding: '8px', width: '300px', marginRight: '8px' }}
-                />
-                <button type="submit" style={{ padding: '8px 16px' }}>Search</button>
-            </form>
-
-            <Filters
-                city={city}
-                state={state}
-                type={type}
-                onCityChange={handleFilterChange(setCity)}
-                onStateChange={handleFilterChange(setState)}
-                onTypeChange={handleFilterChange(setType)}
-            />
-
-            <button
-                onClick={() => setShowFavorites(prev => !prev)}
-                style={{ padding: '8px 16px', marginBottom: '16px', background: showFavorites ? '#f5a623' : '#eee' }}
-            >
-                {showFavorites ? '★ Showing Favorites' : '☆ Show Favorites'} ({favorites.length})
-            </button>
-
-            {mappableBreweries.length > 0 && (
-                <div style={{ marginBottom: '24px' }}>
-                    <h2>Map</h2>
-                    <BreweryMap breweries={mappableBreweries} />
+        <div className="explore-page">
+            <div className="explore-header">
+                <div>
+                    <div className="brand-label">KAPEKO</div>
+                    <h1>Explore breweries</h1>
+                    <p className="subtitle">Discover breweries, brewpubs, and taprooms with a map-focused layout.</p>
                 </div>
-            )}
+                <div className="explore-header__actions">
+                    <div className="favorites-count">
+                        <span className="favorites-label">Favorites saved:</span>
+                        <span className="favorites-number">{favorites.length}</span>
+                    </div>
+                    <button className="btn btn-primary" type="button">Near Me</button>
+                </div>
+            </div>
 
-            {isLoading && <p>Loading...</p>}
-            {isError && <p>Something went wrong.</p>}
-            {!isLoading && !isError && displayedBreweries.length === 0 && <p>No breweries found.</p>}
+            <div className="explore-layout">
+                <aside className="map-panel">
+                    <div className="panel-card panel-card--map">
+                        {mappableBreweries.length > 0 ? (
+                            <BreweryMap breweries={mappableBreweries} />
+                        ) : (
+                            <div className="empty-state">No breweries available for the map.</div>
+                        )}
+                    </div>
+                </aside>
+                <main className="list-panel">
+                    <div className="panel-card panel-card--list">
+                        <div className="search-bar-section">
+                            <div className="search-input-wrapper">
+                                <input
+                                    type="text"
+                                    className="search-input"
+                                    placeholder="Search breweries..."
+                                    value={search}
+                                    onChange={(e) => {
+                                        setSearch(e.target.value)
+                                        setPage(1)
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="panel-card__controls">
+                            <Filters
+                                state={state}
+                                type={type}
+                                onStateChange={handleFilterChange(setState)}
+                                onTypeChange={handleFilterChange(setType)}
+                            />
+                        </div>
+                        <div className="panel-meta">
+                            <div>
+                                <h2>Brewery results</h2>
+                            </div>
+                            <p className="meta-copy">{displayedBreweries.length} locations</p>
+                        </div>
 
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-                {displayedBreweries.map(brewery => (
-                    <BreweryCard key={brewery.id} brewery={brewery} />
-                ))}
-            </ul>
+                        <div className="brewery-list-wrapper">
+                            <ul className="brewery-list">
+                                {displayedBreweries.map((brewery) => (
+                                    <BreweryCard key={brewery.id} brewery={brewery} />
+                                ))}
+                            </ul>
+                        </div>
 
-            {!showFavorites && (
-                <Pagination
-                    page={page}
-                    totalPages={totalPages}
-                    onPageChange={setPage}
-                />
-            )}
+                        <div className="pagination-wrapper">
+                            <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
     )
 }
