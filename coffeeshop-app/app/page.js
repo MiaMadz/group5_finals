@@ -1,9 +1,9 @@
-import ExplorePage from './Pages/ExplorePage'
+import HomePage from './Pages/HomePage'
 
 export default function Home() {
     return (
         <main>
-            <ExplorePage />
+            <HomePage />
         </main>
     )
 }

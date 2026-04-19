@@ -77,11 +77,11 @@ export default function Navbar() {
     return (
         <nav style={styles.nav}>
             <Link href="/" style={styles.logo}>
-                KAPEKO
+                SIPSYNC
             </Link>
 
             <div style={styles.centerLinks}>
-                {navLink('/', 'Home')}
+                {navLink('/Home', 'Home')}
                 {navLink('/Explore', 'Explore')}
                 {navLink('/Brewery', 'Near Me', <MapPin size={18} />)}
                 {/* About Us link removed */}
