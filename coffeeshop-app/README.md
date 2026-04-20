@@ -8,4 +8,6 @@ Sayre, Jadhel D.
 
 A coffee shop finder using react leaflet for mapping
 
+installed leaflet and lucide-react
+
 API used:  https://api.openbrewerydb.org/v1/breweries/
