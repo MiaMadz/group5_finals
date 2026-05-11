@@ -31,7 +31,9 @@ export default function Navbar() {
             {label}
         </Link>
     )
-
+    const currentPath = pathname?.toLowerCase() || ''
+    if (currentPath.startsWith('/login')) return null
+    
     const styles = {
         nav: {
             position: 'sticky',
