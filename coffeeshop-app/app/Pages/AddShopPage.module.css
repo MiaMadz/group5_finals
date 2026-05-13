@@ -107,18 +107,14 @@
 
 .formGroup select {
     appearance: auto;
-    -webkit-appearance: menulist-button;
-    -moz-appearance: menulist-button;
+    -webkit-appearance: menulist;
+    -moz-appearance: listbox;
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    padding-right: 40px;
-}
-
-.formGroup select option {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding: 4px 8px;
+    height: auto;
+    overflow-y: auto;
 }
 
 .formGroup input::placeholder {
@@ -139,10 +135,6 @@
     background: #1C0F0A;
 }
 
-.formGroup select {
-    cursor: pointer;
-}
-
 .formGroup select option {
     background: #1C0F0A;
     color: #F5EFE6;
@@ -151,7 +143,6 @@
     text-overflow: ellipsis;
 }
 
-/* ── Submit button ── */
 .submitBtn {
     padding: 14px 20px;
     background: linear-gradient(135deg, #E8A94D 0%, #C9782A 100%);

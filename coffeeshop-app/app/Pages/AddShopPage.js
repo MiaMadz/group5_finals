@@ -184,6 +184,7 @@ export default function AddShopPage() {
                             value={formData.country}
                             onChange={handleChange}
                             disabled={isLoading}
+                            size={5}
                         >
                             <option value="">Select a country</option>
                             {COUNTRIES.map(country => (
