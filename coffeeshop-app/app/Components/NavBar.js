@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useSelector } from 'react-redux'
 import { useState, useEffect } from 'react'
-import { Heart } from 'lucide-react'
+import { Heart, Plus } from 'lucide-react'
 
 export default function Navbar() {
     const pathname = usePathname()
@@ -73,6 +73,7 @@ export default function Navbar() {
             <div style={styles.rightSection}>
                 {navLink('/Home', 'Home')}
                 {navLink('/Explore', 'Explore')}
+                {navLink('/AddShop', 'Add Shop')}
 
                 <Link href="/Favorite" style={{ 
                     position: 'relative', 

@@ -20,6 +20,7 @@ export default function ExplorePage() {
     const [selectedLocation, setSelectedLocation] = useState(null)
 
     const favorites = useSelector((state) => state.favorites?.items || [])
+    const userShops = useSelector((state) => state.userShops?.items || [])
 
     const filters = { name: search, country, type, page, perPage: PER_PAGE }
 
@@ -63,8 +64,12 @@ export default function ExplorePage() {
             <div className="explore-layout">
                 <aside className="map-panel">
                     <div className="panel-card panel-card--map">
-                        {mappableBreweries.length > 0 ? (
-                            <BreweryMap breweries={mappableBreweries} selectedBrewery={selectedLocation} />
+                        {mappableBreweries.length > 0 || userShops.length > 0 ? (
+                            <BreweryMap 
+                                breweries={mappableBreweries} 
+                                userShops={userShops}
+                                selectedBrewery={selectedLocation} 
+                            />
                         ) : (
                             <div className="empty-state">No breweries available for the map.</div>
                         )}
