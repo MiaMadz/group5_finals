@@ -5,16 +5,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 .card {
-    width: 100%;
+    width: min(100%, 600px);
     max-width: 600px;
     background: #2A1410;
     border-radius: 8px;
     border: 1px solid rgba(201, 120, 42, 0.25);
     padding: 40px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
 }
 
 .header {
@@ -41,6 +44,7 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-width: 0;
 }
 
 .alert {
@@ -67,6 +71,8 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .formGroup label {
@@ -79,6 +85,10 @@
 
 .formGroup input,
 .formGroup select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     padding: 12px 16px;
     background: #1C0F0A;
     border: 1px solid rgba(201, 120, 42, 0.25);
@@ -87,6 +97,28 @@
     font-size: 14px;
     font-family: inherit;
     transition: all 0.3s ease;
+}
+
+.formGroup input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.formGroup select {
+    appearance: auto;
+    -webkit-appearance: menulist-button;
+    -moz-appearance: menulist-button;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-right: 40px;
+}
+
+.formGroup select option {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .formGroup input::placeholder {
@@ -114,8 +146,12 @@
 .formGroup select option {
     background: #1C0F0A;
     color: #F5EFE6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* ── Submit button ── */
 .submitBtn {
     padding: 14px 20px;
     background: linear-gradient(135deg, #E8A94D 0%, #C9782A 100%);

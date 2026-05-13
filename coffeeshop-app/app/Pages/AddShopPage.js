@@ -19,8 +19,8 @@ const SHOP_TYPES = [
 ]
 
 const COUNTRIES = [
-    'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'Belgium', 
-    'France', 'Czech Republic', 'Ireland', 'Netherlands', 'Italy', 'Spain', 
+    'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'Belgium',
+    'France', 'Czech Republic', 'Ireland', 'Netherlands', 'Italy', 'Spain',
     'Australia', 'New Zealand', 'Japan', 'Brazil', 'Argentina', 'South Africa',
     'Other'
 ]
@@ -40,6 +40,7 @@ export default function AddShopPage() {
         country: '',
         shopType: '',
     })
+    const [customCountry, setCustomCountry] = useState('')
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -47,6 +48,14 @@ export default function AddShopPage() {
             ...prev,
             [name]: value
         }))
+        if (name === 'country' && value !== 'Other') {
+            setCustomCountry('')
+        }
+        setError('')
+    }
+
+    const handleCustomCountryChange = (e) => {
+        setCustomCountry(e.target.value)
         setError('')
     }
 
@@ -57,7 +66,7 @@ export default function AddShopPage() {
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
             )
             const data = await response.json()
-            
+
             if (data.length > 0) {
                 return {
                     latitude: parseFloat(data[0].lat),
@@ -75,7 +84,6 @@ export default function AddShopPage() {
         setError('')
         setSuccess('')
 
-        // Validation
         if (!formData.shopName.trim()) {
             setError('Shop name is required')
             return
@@ -88,6 +96,10 @@ export default function AddShopPage() {
             setError('Country is required')
             return
         }
+        if (formData.country === 'Other' && !customCountry.trim()) {
+            setError('Please enter a country name')
+            return
+        }
         if (!formData.shopType) {
             setError('Shop type is required')
             return
@@ -96,15 +108,16 @@ export default function AddShopPage() {
         setIsLoading(true)
 
         try {
-            // Geocode the address to get latitude and longitude
-            const coords = await geocodeAddress(formData.address, formData.country)
+            const countryForGeocode = formData.country === 'Other' ? customCountry : formData.country
+            const coords = await geocodeAddress(formData.address, countryForGeocode)
 
+            const finalCountry = formData.country === 'Other' ? customCountry.trim() : formData.country
             const shopData = {
                 name: formData.shopName.trim(),
                 address: formData.address.trim(),
                 website_url: formData.websiteUrl.trim(),
                 directions_url: formData.directionsUrl.trim() || `https://www.google.com/maps/search/${encodeURIComponent(formData.shopName + ' ' + formData.address)}`,
-                country: formData.country,
+                country: finalCountry,
                 brewery_type: formData.shopType,
                 latitude: coords.latitude,
                 longitude: coords.longitude,
@@ -113,7 +126,7 @@ export default function AddShopPage() {
 
             dispatch(addShop(shopData))
             setSuccess('Shop added successfully!')
-            
+
             setTimeout(() => {
                 router.push('/Explore')
             }, 1500)
@@ -162,6 +175,7 @@ export default function AddShopPage() {
                         />
                     </div>
 
+                    {/* Scrollable country list box */}
                     <div className={styles.formGroup}>
                         <label htmlFor="country">Country *</label>
                         <select
@@ -177,6 +191,20 @@ export default function AddShopPage() {
                             ))}
                         </select>
                     </div>
+
+                    {formData.country === 'Other' && (
+                        <div className={styles.formGroup}>
+                            <label htmlFor="customCountry">Enter Country Name *</label>
+                            <input
+                                type="text"
+                                id="customCountry"
+                                value={customCountry}
+                                onChange={handleCustomCountryChange}
+                                placeholder="e.g., New Zealand"
+                                disabled={isLoading}
+                            />
+                        </div>
+                    )}
 
                     <div className={styles.formGroup}>
                         <label htmlFor="shopType">Shop Type *</label>
@@ -220,8 +248,8 @@ export default function AddShopPage() {
                         />
                     </div>
 
-                    <button 
-                        type="submit" 
+                    <button
+                        type="submit"
                         className={styles.submitBtn}
                         disabled={isLoading}
                     >
