@@ -116,8 +116,11 @@ export default function AddShopPage() {
     }
 
     return (
-        <div className={styles.container}>
-            <div className={styles.card}>
+        <div className={styles.wrapper}>
+            <div className={styles.bg} />
+            <div className={styles.grain} />
+            <div className={styles.container}>
+                <div className={styles.card}>
                 <div className={styles.header}>
                     <h1>Add Your Coffee Shop</h1>
                     <p>Share your shop with the SipSync community</p>
@@ -217,6 +220,7 @@ export default function AddShopPage() {
                         {isLoading ? 'Adding Shop...' : 'Add Shop'}
                     </button>
                 </form>
+            </div>
             </div>
         </div>
     )
