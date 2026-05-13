@@ -18,13 +18,6 @@ const SHOP_TYPES = [
     { value: 'proprietor', label: 'Proprietor' },
 ]
 
-const COUNTRIES = [
-    'United States', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'Belgium',
-    'France', 'Czech Republic', 'Ireland', 'Netherlands', 'Italy', 'Spain',
-    'Australia', 'New Zealand', 'Japan', 'Brazil', 'Argentina', 'South Africa',
-    'Other'
-]
-
 export default function AddShopPage() {
     const dispatch = useDispatch()
     const router = useRouter()
@@ -40,7 +33,6 @@ export default function AddShopPage() {
         country: '',
         shopType: '',
     })
-    const [customCountry, setCustomCountry] = useState('')
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -48,14 +40,6 @@ export default function AddShopPage() {
             ...prev,
             [name]: value
         }))
-        if (name === 'country' && value !== 'Other') {
-            setCustomCountry('')
-        }
-        setError('')
-    }
-
-    const handleCustomCountryChange = (e) => {
-        setCustomCountry(e.target.value)
         setError('')
     }
 
@@ -92,12 +76,8 @@ export default function AddShopPage() {
             setError('Address is required')
             return
         }
-        if (!formData.country) {
+        if (!formData.country.trim()) {
             setError('Country is required')
-            return
-        }
-        if (formData.country === 'Other' && !customCountry.trim()) {
-            setError('Please enter a country name')
             return
         }
         if (!formData.shopType) {
@@ -108,16 +88,14 @@ export default function AddShopPage() {
         setIsLoading(true)
 
         try {
-            const countryForGeocode = formData.country === 'Other' ? customCountry : formData.country
-            const coords = await geocodeAddress(formData.address, countryForGeocode)
+            const coords = await geocodeAddress(formData.address, formData.country.trim())
 
-            const finalCountry = formData.country === 'Other' ? customCountry.trim() : formData.country
             const shopData = {
                 name: formData.shopName.trim(),
                 address: formData.address.trim(),
                 website_url: formData.websiteUrl.trim(),
                 directions_url: formData.directionsUrl.trim() || `https://www.google.com/maps/search/${encodeURIComponent(formData.shopName + ' ' + formData.address)}`,
-                country: finalCountry,
+                country: formData.country.trim(),
                 brewery_type: formData.shopType,
                 latitude: coords.latitude,
                 longitude: coords.longitude,
@@ -178,34 +156,16 @@ export default function AddShopPage() {
                     {/* Scrollable country list box */}
                     <div className={styles.formGroup}>
                         <label htmlFor="country">Country *</label>
-                        <select
+                        <input
+                            type="text"
                             id="country"
                             name="country"
                             value={formData.country}
                             onChange={handleChange}
+                            placeholder="Enter country"
                             disabled={isLoading}
-                            size={5}
-                        >
-                            <option value="">Select a country</option>
-                            {COUNTRIES.map(country => (
-                                <option key={country} value={country}>{country}</option>
-                            ))}
-                        </select>
+                        />
                     </div>
-
-                    {formData.country === 'Other' && (
-                        <div className={styles.formGroup}>
-                            <label htmlFor="customCountry">Enter Country Name *</label>
-                            <input
-                                type="text"
-                                id="customCountry"
-                                value={customCountry}
-                                onChange={handleCustomCountryChange}
-                                placeholder="e.g., New Zealand"
-                                disabled={isLoading}
-                            />
-                        </div>
-                    )}
 
                     <div className={styles.formGroup}>
                         <label htmlFor="shopType">Shop Type *</label>
