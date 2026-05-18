@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { addShop } from '../rtk/userShopsSlice'
 import { useRouter } from 'next/navigation'
@@ -32,7 +32,9 @@ export default function AddShopPage() {
         directionsUrl: '',
         country: '',
         shopType: '',
+        businessPermit: null,
     })
+    const [previewUrl, setPreviewUrl] = useState('')
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -42,6 +44,38 @@ export default function AddShopPage() {
         }))
         setError('')
     }
+
+    const handleFileChange = (e) => {
+        const file = e.target.files?.[0] || null
+        setFormData(prev => ({
+            ...prev,
+            businessPermit: file,
+        }))
+        setError('')
+    }
+
+    const handleRemoveFile = () => {
+        setFormData(prev => ({
+            ...prev,
+            businessPermit: null,
+        }))
+        setPreviewUrl('')
+        setError('')
+    }
+
+    useEffect(() => {
+        if (!formData.businessPermit) {
+            setPreviewUrl('')
+            return
+        }
+
+        const url = URL.createObjectURL(formData.businessPermit)
+        setPreviewUrl(url)
+
+        return () => {
+            URL.revokeObjectURL(url)
+        }
+    }, [formData.businessPermit])
 
     const geocodeAddress = async (address, country) => {
         try {
@@ -84,6 +118,10 @@ export default function AddShopPage() {
             setError('Shop type is required')
             return
         }
+        if (!formData.businessPermit) {
+            setError('A photo of your business permit is required')
+            return
+        }
 
         setIsLoading(true)
 
@@ -100,6 +138,7 @@ export default function AddShopPage() {
                 latitude: coords.latitude,
                 longitude: coords.longitude,
                 isUserShop: true,
+                businessPermitName: formData.businessPermit?.name || '',
             }
 
             dispatch(addShop(shopData))
@@ -120,13 +159,14 @@ export default function AddShopPage() {
             <div className={styles.bg} />
             <div className={styles.grain} />
             <div className={styles.container}>
+                <div className={styles.imagePanel} />
                 <div className={styles.card}>
-                <div className={styles.header}>
-                    <h1>Add Your Coffee Shop</h1>
-                    <p>Share your shop with the SipSync community</p>
-                </div>
+                    <div className={styles.header}>
+                        <h1>Add Your Coffee Shop</h1>
+                        <p>Share your shop with the SipSync community</p>
+                    </div>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                    <form onSubmit={handleSubmit} className={styles.form}>
                     {error && <div className={styles.alert + ' ' + styles.error}>{error}</div>}
                     {success && <div className={styles.alert + ' ' + styles.success}>{success}</div>}
 
@@ -210,6 +250,40 @@ export default function AddShopPage() {
                             placeholder="Google Maps link"
                             disabled={isLoading}
                         />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="businessPermit">Business Permit Photo *</label>
+                        <label className={styles.dropZone} htmlFor="businessPermit">
+                            <input
+                                type="file"
+                                id="businessPermit"
+                                name="businessPermit"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                disabled={isLoading}
+                            />
+
+                            {previewUrl ? (
+                                <div className={styles.dropZonePreviewWrap}>
+                                    <img src={previewUrl} alt="Business permit preview" className={styles.dropZonePreview} />
+                                    <button
+                                        type="button"
+                                        className={styles.removeFileBtn}
+                                        onClick={handleRemoveFile}
+                                        disabled={isLoading}
+                                    >
+                                        Remove photo
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className={styles.dropZoneContent}>
+                                    <span className={styles.dropZoneIcon}>📷</span>
+                                    <p>Drop photo here or click to upload</p>
+                                    <span className={styles.dropZoneHint}>Accepted: JPG, PNG</span>
+                                </div>
+                            )}
+                        </label>
                     </div>
 
                     <button
