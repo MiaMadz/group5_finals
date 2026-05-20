@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useSearchBreweriesQuery, useGetBreweryCountQuery } from '../rtk/breweryApi'
+import { useGetCafesQuery } from '../rtk/breweryApi'
 import dynamic from 'next/dynamic'
 import Filters from '../Components/Filters'
 import Pagination from '../Components/Pagination'
@@ -21,12 +21,21 @@ export default function ExplorePage() {
 
     const favorites = useSelector((state) => state.favorites?.items || [])
 
-    const filters = { name: search, country, type, page, perPage: PER_PAGE }
+    const params = { page, limit: PER_PAGE }
+    // backend supports `city` and `type`. don't send the UI `country` value as `city` —
+    // that causes zero results when users pick a country. Only send `type` server-side.
+    if (type) params.type = type
 
-    const { data: breweries = [], isLoading, isError } = useSearchBreweriesQuery(filters)
-    const { data: meta } = useGetBreweryCountQuery({ name: search, country, type })
+    const { data: cafes = [], isLoading, isError } = useGetCafesQuery(params)
 
-    const totalPages = meta?.total ? Math.ceil(Number(meta.total) / PER_PAGE) : 1
+    // apply `country` and `search` filters client-side
+    const filteredByName = cafes.filter((b) => {
+        const matchesName = !search || b.name?.toLowerCase().includes(search.toLowerCase())
+        const matchesCountry = !country || b.country === country
+        return matchesName && matchesCountry
+    })
+
+    const totalPages = Math.max(1, Math.ceil((cafes.length || 0) / PER_PAGE))
 
     const handleFilterChange = (setter) => (value) => {
         setter(value)
@@ -42,7 +51,7 @@ export default function ExplorePage() {
         }
     }
 
-    const displayedBreweries = breweries
+    const displayedBreweries = filteredByName
     const mappableBreweries = displayedBreweries.filter((b) => b.latitude && b.longitude)
 
     return (

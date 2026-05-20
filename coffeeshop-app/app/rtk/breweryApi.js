@@ -1,39 +1,77 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
+const buildCafeQuery = (params = {}) => {
+    const queryParams = { ...params };
+    if (queryParams.perPage) {
+        queryParams.limit = queryParams.perPage;
+        delete queryParams.perPage;
+    }
+    const searchParams = new URLSearchParams(queryParams).toString();
+    return searchParams ? `/?${searchParams}` : `/`;
+};
+
 export const breweryApi = createApi({
     reducerPath: "breweryApi",
-    baseQuery: fetchBaseQuery({ baseUrl: 'https://api.openbrewerydb.org/v1/breweries' }),
+    baseQuery: fetchBaseQuery({ baseUrl: `${process.env.NEXT_PUBLIC_API_URL}/api/cafes` }),
     tagTypes: ["Brewery"],
     endpoints: (builder) => ({
 
+        getCafes: builder.query({
+            query: (params = {}) => buildCafeQuery(params),
+            providesTags: ['Brewery'],
+        }),
+
         searchBreweries: builder.query({
-            query: ({ name = '', city = '', country = '', type = '', page = 1, perPage = 10 }) => {
-                const params = new URLSearchParams()
-                if (name)    params.append('by_name', name)
-                if (city)    params.append('by_city', city)
-                if (country) params.append('by_country', country)
-                if (type)    params.append('by_type', type)
-                params.append('page', page)
-                params.append('per_page', perPage)
-                return `?${params.toString()}`
-            },
+            query: (params = {}) => buildCafeQuery(params),
+            providesTags: ['Brewery'],
         }),
 
         getBreweryCount: builder.query({
-            query: ({ name = '', city = '', country = '', type = '' } = {}) => {
-                const params = new URLSearchParams()
-                if (name)    params.append('by_name', name)
-                if (city)    params.append('by_city', city)
-                if (country) params.append('by_country', country)
-                if (type)    params.append('by_type', type)
-                return `/meta?${params.toString()}`
+            query: (params = {}) => {
+                const queryParams = { ...params };
+                if (queryParams.perPage) {
+                    delete queryParams.perPage;
+                }
+                const searchParams = new URLSearchParams(queryParams).toString();
+                return searchParams ? `/count?${searchParams}` : `/count`;
             },
+            providesTags: ['Brewery'],
         }),
 
-        getBreweryById: builder.query({
-            query: (id) => `/${id}`
+        getCafeById: builder.query({
+            query: (id) => `/${id}`,
+            providesTags: (result, error, id) => [{ type: 'Brewery', id }],
+        }),
+
+        addCafe: builder.mutation({
+            query: (data) => ({ url: '/', method: 'POST', body: data }),
+            invalidatesTags: ['Brewery'],
+        }),
+
+        updateCafe: builder.mutation({
+            query: ({ id, ...data }) => ({ url: `/${id}`, method: 'PUT', body: data }),
+            invalidatesTags: (result, error, { id }) => [{ type: 'Brewery', id }],
+        }),
+
+        deleteCafe: builder.mutation({
+            query: (id) => ({ url: `/${id}`, method: 'DELETE' }),
+            invalidatesTags: (result, error, id) => [{ type: 'Brewery', id }],
+        }),
+
+        importFromApi: builder.mutation({
+            query: (payload) => ({ url: '/import', method: 'POST', body: payload }),
+            invalidatesTags: ['Brewery'],
         }),
     })
 })
 
-export const {useSearchBreweriesQuery, useGetBreweryCountQuery, useGetBreweryByIdQuery} = breweryApi
+export const {
+    useGetCafesQuery,
+    useSearchBreweriesQuery,
+    useGetBreweryCountQuery,
+    useGetCafeByIdQuery,
+    useAddCafeMutation,
+    useUpdateCafeMutation,
+    useDeleteCafeMutation,
+    useImportFromApiMutation,
+} = breweryApi

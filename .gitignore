@@ -1,0 +1,5 @@
+coffeeshop-app/node_modules/
+coffeeshop-app/.next/
+
+coffeeshop-backend/node_modules/
+coffeeshop-backend/.env
