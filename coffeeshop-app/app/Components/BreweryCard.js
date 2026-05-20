@@ -8,13 +8,13 @@ export default function BreweryCard({ brewery, onSelect }) {
         state.favorites.items.some(b => b.id === brewery.id)
     )
 
-    const address = [brewery.street, brewery.city, brewery.state_province]
-        .filter(Boolean)
-        .join(', ')
+    const address = brewery.street || brewery.address || ''
+    const cityState = [brewery.city, brewery.state_province].filter(Boolean).join(', ')
+    const displayAddress = address || cityState
 
     const directionsUrl = brewery.latitude && brewery.longitude
         ? `https://www.google.com/maps/search/?api=1&query=${brewery.latitude},${brewery.longitude}`
-        : `https://www.google.com/maps/search/${encodeURIComponent(address)}`
+        : `https://www.google.com/maps/search/${encodeURIComponent(displayAddress || brewery.name)}`
 
     return (
         <li className="brewery-card" onClick={onSelect} style={{ cursor: onSelect ? 'pointer' : 'default' }}>

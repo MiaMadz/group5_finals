@@ -34,17 +34,36 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
         shadowSize: [0, 0],
     })
 
-    // Combine breweries and user shops
+    // Combine breweries and user shops, then keep only valid coordinates
     const allLocations = [
         ...(breweries || []).map(b => ({ ...b, type: 'brewery' })),
         ...(userShops || []).map(s => ({ ...s, type: 'userShop' }))
     ]
 
-    if (!allLocations.length) return null
+    const validLocations = allLocations.filter((location) => {
+        const lat = parseFloat(location.latitude)
+        const lng = parseFloat(location.longitude)
+        return !Number.isNaN(lat) && !Number.isNaN(lng)
+    })
 
-    const first = allLocations[0]
+    const uniqueLocations = []
+    const seen = new Set()
+
+    for (const location of validLocations) {
+        const key = `${location.type}-${location.id}`
+        if (!seen.has(key)) {
+            seen.add(key)
+            uniqueLocations.push(location)
+        }
+    }
+
+    if (!uniqueLocations.length) return null
+
+    const first = uniqueLocations[0]
     const defaultCenter = [parseFloat(first.latitude), parseFloat(first.longitude)]
-    const selectedCenter = selectedBrewery ? [selectedBrewery.latitude, selectedBrewery.longitude] : null
+    const selectedCenter = selectedBrewery && !Number.isNaN(parseFloat(selectedBrewery.latitude)) && !Number.isNaN(parseFloat(selectedBrewery.longitude))
+        ? [parseFloat(selectedBrewery.latitude), parseFloat(selectedBrewery.longitude)]
+        : null
 
     return (
         <MapContainer center={selectedCenter || defaultCenter} zoom={6} scrollWheelZoom={true} className="brewery-map">
@@ -53,10 +72,10 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {selectedCenter && <MapCenter center={selectedCenter} zoom={12} />}
-            {allLocations.map((location) => {
+            {uniqueLocations.map((location) => {
                 const icon = location.type === 'userShop' ? userShopIcon : breweryIcon
                 return (
-                    <Marker key={location.id} icon={icon} position={[parseFloat(location.latitude), parseFloat(location.longitude)]}>
+                    <Marker key={`${location.type}-${location.id}`} icon={icon} position={[parseFloat(location.latitude), parseFloat(location.longitude)]}>
                         <Popup>
                             <strong>{location.name}</strong><br />
                             {location.type === 'userShop' && (

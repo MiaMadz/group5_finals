@@ -77,6 +77,8 @@ export default function AddShopPage() {
         }
     }, [formData.businessPermit])
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+
     const geocodeAddress = async (address, country) => {
         try {
             const query = `${address}, ${country}`
@@ -141,14 +143,46 @@ export default function AddShopPage() {
                 businessPermitName: formData.businessPermit?.name || '',
             }
 
-            dispatch(addShop(shopData))
+            console.log('Submitting shop to API:', API_URL + '/api/cafes', shopData)
+
+            const apiEndpoint = `${API_URL}/api/cafes`
+            const res = await fetch(apiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(shopData),
+            })
+
+            if (!res.ok) {
+                let errMessage = `Failed to save shop to database (${res.status})`
+                const errData = await res.json().catch(() => null)
+                if (errData?.error) errMessage = errData.error
+                throw new Error(errMessage)
+            }
+
+            const saved = await res.json()
+            console.log('Saved cafe response:', saved)
+
+            const shopToDispatch = {
+                ...shopData,
+                ...saved,
+                latitude: saved.latitude ?? coords.latitude,
+                longitude: saved.longitude ?? coords.longitude,
+                brewery_type: saved.brewery_type ?? shopData.brewery_type,
+                address: saved.address ?? shopData.address,
+                country: saved.country ?? shopData.country,
+                website_url: saved.website_url ?? shopData.website_url,
+            }
+
+            // Also update Redux with the saved data
+            dispatch(addShop(shopToDispatch))
+
             setSuccess('Shop added successfully!')
 
             setTimeout(() => {
                 router.push('/Explore')
             }, 1500)
         } catch (err) {
-            setError(err.message || 'Failed to add shop. Please try again.')
+            console.error('Add shop failed:', err)
         } finally {
             setIsLoading(false)
         }
@@ -196,7 +230,6 @@ export default function AddShopPage() {
                         />
                     </div>
 
-                    {/* Scrollable country list box */}
                     <div className={styles.formGroup}>
                         <label htmlFor="country">Country *</label>
                         <input

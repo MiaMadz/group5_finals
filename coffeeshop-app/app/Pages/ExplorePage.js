@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useSearchBreweriesQuery, useGetBreweryCountQuery } from '../rtk/breweryApi'
 import dynamic from 'next/dynamic'
@@ -21,12 +21,46 @@ export default function ExplorePage() {
 
     const favorites = useSelector((state) => state.favorites?.items || [])
     const userShops = useSelector((state) => state.userShops?.items || [])
+    const [dbUserShops, setDbUserShops] = useState([])
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
     const filters = { name: search, country, type, page, perPage: PER_PAGE }
 
     const { data: breweries = [], isLoading, isError } = useSearchBreweriesQuery(filters)
     const { data: meta } = useGetBreweryCountQuery({ name: search, country, type })
 
+    useEffect(() => {
+        const fetchUserShops = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/cafes?is_user_shop=1`)
+                if (!response.ok) {
+                    console.error('Failed to load user shops from backend', response.status)
+                    return
+                }
+                const cafes = await response.json()
+                setDbUserShops(cafes)
+            } catch (error) {
+                console.error('Error fetching user shops from backend:', error)
+            }
+        }
+
+        fetchUserShops()
+    }, [API_URL])
+
+    const allUserShops = [...dbUserShops, ...userShops]
+
+    const filteredUserShops = allUserShops.filter((shop) => {
+        const matchesSearch = !search ||
+            shop.name?.toLowerCase().includes(search.toLowerCase()) ||
+            shop.address?.toLowerCase().includes(search.toLowerCase())
+
+        const matchesCountry = !country || shop.country?.toLowerCase() === country.toLowerCase()
+        const matchesType = !type || shop.brewery_type === type
+
+        return matchesSearch && matchesCountry && matchesType
+    })
+
+    const displayedBreweries = [...breweries, ...filteredUserShops]
     const totalPages = meta?.total ? Math.ceil(Number(meta.total) / PER_PAGE) : 1
 
     const handleFilterChange = (setter) => (value) => {
@@ -43,8 +77,8 @@ export default function ExplorePage() {
         }
     }
 
-    const displayedBreweries = breweries
-    const mappableBreweries = displayedBreweries.filter((b) => b.latitude && b.longitude)
+    const mappableBreweries = breweries.filter((b) => b.latitude && b.longitude)
+    const mappableUserShops = filteredUserShops.filter((b) => b.latitude && b.longitude)
 
     return (
         <div className="explore-page">
@@ -64,10 +98,10 @@ export default function ExplorePage() {
             <div className="explore-layout">
                 <aside className="map-panel">
                     <div className="panel-card panel-card--map">
-                        {mappableBreweries.length > 0 || userShops.length > 0 ? (
+                        {mappableBreweries.length > 0 || mappableUserShops.length > 0 ? (
                             <BreweryMap 
                                 breweries={mappableBreweries} 
-                                userShops={userShops}
+                                userShops={filteredUserShops}
                                 selectedBrewery={selectedLocation} 
                             />
                         ) : (
