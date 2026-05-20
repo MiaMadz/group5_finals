@@ -18,7 +18,8 @@ const COUNTRIES = [
     'Sweden',
     'Scotland',
     'Italy',
-    'France'
+    'France',
+    'Philippines'
 ]
 
 export default function Filters({ country, type, onCountryChange, onTypeChange }) {
