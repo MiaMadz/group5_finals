@@ -49,7 +49,14 @@ export default function ExplorePage() {
 
     const allUserShops = [...dbUserShops, ...userShops]
 
-    const filteredUserShops = allUserShops.filter((shop) => {
+    const uniqueUserShops = Array.from(
+        new Map(allUserShops.map((shop) => {
+            const key = shop.id != null ? shop.id : `${shop.name}-${shop.address}`
+            return [key, shop]
+        }))
+    ).map(([_, shop]) => shop)
+
+    const filteredUserShops = uniqueUserShops.filter((shop) => {
         const matchesSearch = !search ||
             shop.name?.toLowerCase().includes(search.toLowerCase()) ||
             shop.address?.toLowerCase().includes(search.toLowerCase())
@@ -60,7 +67,12 @@ export default function ExplorePage() {
         return matchesSearch && matchesCountry && matchesType
     })
 
-    const displayedBreweries = [...breweries, ...filteredUserShops]
+    const displayedBreweries = [...breweries, ...filteredUserShops].sort((a, b) => {
+        const nameA = (a.name || '').toLowerCase()
+        const nameB = (b.name || '').toLowerCase()
+        return nameA.localeCompare(nameB)
+    })
+
     const totalPages = meta?.total ? Math.ceil(Number(meta.total) / PER_PAGE) : 1
 
     const handleFilterChange = (setter) => (value) => {

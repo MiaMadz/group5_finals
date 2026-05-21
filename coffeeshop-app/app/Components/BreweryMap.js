@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 
@@ -16,7 +16,14 @@ function MapCenter({ center, zoom }) {
 }
 
 export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
-    const breweryIcon = L.icon({
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+        return () => setMounted(false)
+    }, [])
+
+    const breweryIcon = useMemo(() => L.icon({
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
@@ -24,15 +31,17 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
         shadowSize: [41, 41],
-    })
+    }), [])
 
-    const userShopIcon = L.icon({
-        iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0U4QTk0RCIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6TTEyIDIwYy00LjQxIDAtOC0zLjU5LTgtOHMzLjU5LTggOC04IDggMy41OSA4IDgtMy41OSA4LTggOHptMy41LTljLS44MyAwLTEuNS0uNjctMS41LTEuNXMuNjctMS41IDEuNS0xLjUgMS41LjY3IDEuNSAxLjUtLjY3IDEuNS0xLjUgMS41ek04LjUgMTFjLS44MyAwLTEuNS0uNjctMS41LTEuNXMuNjctMS41IDEuNS0xLjUgMS41LjY3IDEuNSAxLjUtLjY3IDEuNS0xLjUgMS41eiIvPjwvc3ZnPg==',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
+    const userShopIcon = useMemo(() => L.icon({
+        iconUrl: "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2034'%3E%3Cpath%20fill='%230072c6'%20d='M12%202C7.03%202%203%206.03%203%2011c0%206.28%207.36%2015.4%208.14%2016.32a1%201%200%200%200%201.72%200C13.64%2026.4%2021%2017.28%2021%2011c0-4.97-4.03-9-9-9z'/%3E%3Ccircle%20cx='12'%20cy='11'%20r='4'%20fill='%23ffffff'/%3E%3C/svg%3E",
+        iconSize: [30, 45],
+        iconAnchor: [15, 45],
+        popupAnchor: [0, -38],
         shadowSize: [0, 0],
-    })
+    }), [])
+
+    if (!mounted) return null
 
     // Combine breweries and user shops, then keep only valid coordinates
     const allLocations = [
@@ -65,8 +74,17 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
         ? [parseFloat(selectedBrewery.latitude), parseFloat(selectedBrewery.longitude)]
         : null
 
+    const mapKey = `${selectedCenter ? selectedCenter.join(',') : defaultCenter.join(',')}-${uniqueLocations.length}`
+
     return (
-        <MapContainer center={selectedCenter || defaultCenter} zoom={6} scrollWheelZoom={true} className="brewery-map">
+        <MapContainer
+            key={mapKey}
+            center={selectedCenter || defaultCenter}
+            zoom={6}
+            scrollWheelZoom={true}
+            className="brewery-map"
+            style={{ height: '100%', width: '100%' }}
+        >
             <TileLayer
                 attribution='&copy; OpenStreetMap contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -74,8 +92,11 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
             {selectedCenter && <MapCenter center={selectedCenter} zoom={12} />}
             {uniqueLocations.map((location) => {
                 const icon = location.type === 'userShop' ? userShopIcon : breweryIcon
+                const markerKey = location.id != null
+                    ? `${location.type}-${location.id}`
+                    : `${location.type}-${location.name}-${location.address}`
                 return (
-                    <Marker key={`${location.type}-${location.id}`} icon={icon} position={[parseFloat(location.latitude), parseFloat(location.longitude)]}>
+                    <Marker key={markerKey} icon={icon} position={[parseFloat(location.latitude), parseFloat(location.longitude)]}>
                         <Popup>
                             <strong>{location.name}</strong><br />
                             {location.type === 'userShop' && (
