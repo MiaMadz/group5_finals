@@ -8,9 +8,8 @@ class CafeController {
             const limit = parseInt(req.query.limit) || 20;
             const city  = req.query.city  || '';
             const type  = req.query.type  || '';
-            const isUserShop = req.query.is_user_shop != null ? req.query.is_user_shop === '1' : null;
 
-            const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop);
+            const cafes = await CafeModel.getAllModel(page, limit, city, type);
             res.json(cafes);
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -27,23 +26,14 @@ class CafeController {
         }
     }
 
-static async addCafe(req, res) {
-    try {
-        console.log('addCafe request body:', req.body)
-        
-        // Test DB connection first
-        const db = require('../config/db');
-        const [test] = await db.query('SELECT 1');
-        console.log('DB test passed:', test);
-
-        const result = await CafeModel.addCafe(req.body);
-        console.log('addCafe result:', result)
-        res.json({ message: 'Cafe added successfully', id: result.insertId });
-    } catch (err) {
-        console.error('Error saving cafe:', err.message);
-        res.status(500).json({ error: err.message });
+    static async addCafe(req, res) {
+        try {
+            const result = await CafeModel.addCafe(req.body);
+            res.json({ message: 'Cafe added successfully', id: result.insertId });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
     }
-}
 
     static async updateCafe(req, res) {
         try {
