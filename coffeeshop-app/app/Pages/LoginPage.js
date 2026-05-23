@@ -11,8 +11,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [noAccountFound, setNoAccountFound] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const router = useRouter();
 
   const handleClose = () => {
@@ -22,7 +22,6 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setNoAccountFound(false);
 
     try {
       const response = await fetch(`${API_URL}/api/users/login`, {
@@ -31,25 +30,39 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
+      if (!acceptedTerms) {
+        setError('⚠️ You must agree to the terms and conditions before logging in.');
+        return;
+      }
+
       if (response.ok) {
         router.push('/Home');
         return;
       }
 
-      if (response.status === 404) {
-        setNoAccountFound(true);
+      let data = {};
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      const errorMessage = data.error?.toLowerCase() || '';
+
+      if (response.status === 404 || errorMessage.includes('not found')) {
+        setError('⚠️ Account not found. Please sign up first.');
         return;
       }
 
-      const data = await response.json();
-      setError(data.error || 'Unable to login. Please try again.');
+      if (response.status === 401 || errorMessage.includes('incorrect password')) {
+        setError('⚠️ Incorrect password. Please try again.');
+        return;
+      }
+
+      setError('Unable to login. Please try again.');
     } catch (err) {
       setError('Unable to connect to the server. Please try again later.');
     }
-  };
-
-  const handleSignUpRedirect = () => {
-    router.push('/SignUp');
   };
 
   if (!isVisible) {
@@ -75,89 +88,74 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {noAccountFound ? (
-            <div className={styles.noAccountNotice}>
-              <h2 className={styles.noticeTitle}>Account Not Found</h2>
-              <p className={styles.noticeMessage}>
-                No account exists for <strong>{email}</strong>. Please sign up first to create your account.
-              </p>
-              <button 
-                type="button" 
-                className={styles.loginButton}
-                onClick={handleSignUpRedirect}
-              >
-                Sign Up Now
-              </button>
-              <button 
-                type="button" 
-                className={styles.secondaryButton}
-                onClick={() => setNoAccountFound(false)}
-              >
-                Back to Login
-              </button>
+          <form className={styles.loginForm} onSubmit={handleLogin}>
+            {error && <div className={styles.errorMessage}>{error}</div>}
+            <div className={styles.fieldGroup}>
+              <label className={styles.fieldLabel} htmlFor="email">
+                Email
+              </label>
+              <input
+                id="email"
+                className={styles.fieldInput}
+                type="email"
+                placeholder="Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-          ) : (
-            <form className={styles.loginForm} onSubmit={handleLogin}>
-              {error && <div className={styles.errorMessage}>{error}</div>}
-              <div className={styles.fieldGroup}>
-                <label className={styles.fieldLabel} htmlFor="email">
-                  Email
-                </label>
+
+            <div className={styles.fieldGroup}>
+              <div className={styles.fieldLabelRow}>
+                <span>Password</span>
+                <a className={styles.linkButton} href="#">
+                  Forgot Password?
+                </a>
+              </div>
+              <div className={styles.passwordWrapper}>
                 <input
-                  id="email"
+                  id="password"
                   className={styles.fieldInput}
-                  type="email"
-                  placeholder="Email Address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-              </div>
-
-              <div className={styles.fieldGroup}>
-                <div className={styles.fieldLabelRow}>
-                  <span>Password</span>
-                  <a className={styles.linkButton} href="#">
-                    Forgot Password?
-                  </a>
-                </div>
-                <div className={styles.passwordWrapper}>
-                  <input
-                    id="password"
-                    className={styles.fieldInput}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  <img
+                    src={showPassword ? "/images/show.png" : "/images/hidden.png"}
+                    alt={showPassword ? "Hide password" : "Show password"}
+                    className={styles.toggleIcon}
                   />
-                  <button
-                    type="button"
-                    className={styles.passwordToggle}
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    <img
-                      src={showPassword ? "/images/show.png" : "/images/hidden.png"}
-                      alt={showPassword ? "Hide password" : "Show password"}
-                      className={styles.toggleIcon}
-                    />
-                  </button>
-                </div>
+                </button>
               </div>
+            </div>
 
-              <div className={styles.actions}>
-                <label className={styles.rememberMe}>
-                  <input type="checkbox" />
-                  Remember me
-                </label>
-              </div>
+            <div className={styles.actions}>
+              <label className={styles.rememberMe}>
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                />
+                I agree to the terms and conditions
+              </label>
+            </div>
 
-              <button type="submit" className={styles.loginButton}>
-                Login
-              </button>
-            </form>
-          )}
+            <button
+              type="submit"
+              className={styles.loginButton}
+              disabled={!acceptedTerms}
+            >
+              Login
+            </button>
+          </form>
 
           <p className={styles.signupPrompt}>
             Don’t have an account? <a href="/SignUp">Sign up</a>

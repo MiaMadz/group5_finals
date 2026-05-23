@@ -17,6 +17,7 @@ export default function SignUpPage() {
   const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const router = useRouter();
 
   const handleClose = () => {
@@ -28,13 +29,18 @@ export default function SignUpPage() {
     setError('');
     setSuccess('');
 
+    if (!acceptedTerms) {
+      setError('⚠️ You must agree to the terms and conditions before signing up.');
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('⚠️ The password you entered do not match.');
       return;
     }
 
     if (!PASSWORD_REGEX.test(password)) {
-      setError('Password must be at least 8 characters long and include at least one uppercase letter and one number.');
+      setError('⚠️ Password must be at least 8 characters long and include at least one uppercase letter and one number.');
       return;
     }
 
@@ -184,12 +190,20 @@ export default function SignUpPage() {
 
             <div className={styles.actions}>
               <label className={styles.rememberMe}>
-                <input type="checkbox" />
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                />
                 I agree to the terms and conditions
               </label>
             </div>
 
-            <button type="submit" className={styles.loginButton}>
+            <button
+              type="submit"
+              className={styles.loginButton}
+              disabled={!acceptedTerms}
+            >
               Sign Up
             </button>
           </form>
