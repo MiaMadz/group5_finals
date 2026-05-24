@@ -32,7 +32,7 @@ export default function ExplorePage() {
     useEffect(() => {
         const fetchUserShops = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/cafes?is_user_shop=1`)
+                const response = await fetch(`${API_URL}/api/cafes?is_user_shop=1&limit=100`)
                 if (!response.ok) {
                     console.error('Failed to load user shops from backend', response.status)
                     return
