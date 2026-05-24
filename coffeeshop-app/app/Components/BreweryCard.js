@@ -9,12 +9,17 @@ export default function BreweryCard({ brewery, onSelect }) {
     )
 
     const address = brewery.street || brewery.address || ''
-    const cityState = [brewery.city, brewery.state_province].filter(Boolean).join(', ')
+    const city = brewery.city || ''
+    const state = brewery.state_province || ''
+    const postalCode = brewery.postal_code || ''
+    const cityState = [city, state].filter(Boolean).join(', ')
     const displayAddress = address || cityState
 
     const directionsUrl = brewery.latitude && brewery.longitude
         ? `https://www.google.com/maps/search/?api=1&query=${brewery.latitude},${brewery.longitude}`
         : `https://www.google.com/maps/search/${encodeURIComponent(displayAddress || brewery.name)}`
+
+    const fullAddress = [address, city, state, postalCode].filter(Boolean).join(', ')
 
     return (
         <li className="brewery-card" onClick={onSelect} style={{ cursor: onSelect ? 'pointer' : 'default' }}>
@@ -42,7 +47,7 @@ export default function BreweryCard({ brewery, onSelect }) {
                         <path d="M9 0C4.03 0 0 4.03 0 9C0 15.75 9 24 9 24C9 24 18 15.75 18 9C18 4.03 13.97 0 9 0ZM9 12.6C7.16 12.6 5.7 11.14 5.7 9.3C5.7 7.46 7.16 6 9 6C10.84 6 12.3 7.46 12.3 9.3C12.3 11.14 10.84 12.6 9 12.6Z" fill="#FBC02D"/>
                     </svg>
                 </span>
-                {address || `${brewery.city}, ${brewery.state_province}`}
+                {fullAddress}
             </p>
 
             <div className="brewery-card__actions">

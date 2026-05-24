@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 
@@ -16,11 +16,11 @@ function MapCenter({ center, zoom }) {
 }
 
 export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
+    const mapRef = useRef(null)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
         setMounted(true)
-        return () => setMounted(false)
     }, [])
 
     const breweryIcon = useMemo(() => L.icon({
@@ -76,15 +76,21 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
 
     const mapKey = `${selectedCenter ? selectedCenter.join(',') : defaultCenter.join(',')}-${uniqueLocations.length}`
 
+    // Only render map if we have valid data and mounted state
+    if (!mounted || !uniqueLocations.length) {
+        return null
+    }
+
     return (
-        <MapContainer
-            key={mapKey}
-            center={selectedCenter || defaultCenter}
-            zoom={6}
-            scrollWheelZoom={true}
-            className="brewery-map"
-            style={{ height: '100%', width: '100%' }}
-        >
+        <div ref={mapRef} style={{ height: '100%', width: '100%' }}>
+            <MapContainer
+                key={mapKey}
+                center={selectedCenter || defaultCenter}
+                zoom={6}
+                scrollWheelZoom={true}
+                className="brewery-map"
+                style={{ height: '100%', width: '100%' }}
+            >
             <TileLayer
                 attribution='&copy; OpenStreetMap contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -137,5 +143,6 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
                 )
             })}
         </MapContainer>
+        </div>
     )
 }

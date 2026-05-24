@@ -28,6 +28,9 @@ export default function AddShopPage() {
     const [formData, setFormData] = useState({
         shopName: '',
         address: '',
+        city: '',
+        stateProvince: '',
+        postalCode: '',
         websiteUrl: '',
         directionsUrl: '',
         country: '',
@@ -79,15 +82,26 @@ export default function AddShopPage() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
-    const geocodeAddress = async (address, country) => {
+    const geocodeAddress = async (address, city, state, postalCode, country) => {
         try {
-            const query = `${address}, ${country}`
-            const response = await fetch(
+            const parts = [address, city, state, postalCode, country].filter(Boolean)
+            const query = parts.join(', ')
+            
+            let response = await fetch(
                 `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`
             )
-            const data = await response.json()
+            let data = await response.json()
 
-            if (data.length > 0) {
+            // If full query fails, try with just address and country
+            if (!data || data.length === 0) {
+                const fallbackQuery = [address, country].filter(Boolean).join(', ')
+                response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fallbackQuery)}`
+                )
+                data = await response.json()
+            }
+
+            if (data && data.length > 0) {
                 return {
                     latitude: parseFloat(data[0].lat),
                     longitude: parseFloat(data[0].lon),
@@ -112,6 +126,18 @@ export default function AddShopPage() {
             setError('Address is required')
             return
         }
+        if (!formData.city.trim()) {
+            setError('City is required')
+            return
+        }
+        if (!formData.stateProvince.trim()) {
+            setError('Province/State is required')
+            return
+        }
+        if (!formData.postalCode.trim()) {
+            setError('Postal Code is required')
+            return
+        }
         if (!formData.country.trim()) {
             setError('Country is required')
             return
@@ -128,11 +154,20 @@ export default function AddShopPage() {
         setIsLoading(true)
 
         try {
-            const coords = await geocodeAddress(formData.address, formData.country.trim())
+            const coords = await geocodeAddress(
+                formData.address.trim(),
+                formData.city.trim(),
+                formData.stateProvince.trim(),
+                formData.postalCode.trim(),
+                formData.country.trim()
+            )
 
             const shopData = {
                 name: formData.shopName.trim(),
                 address: formData.address.trim(),
+                city: formData.city.trim(),
+                state_province: formData.stateProvince.trim(),
+                postal_code: formData.postalCode.trim(),
                 website_url: formData.websiteUrl.trim(),
                 directions_url: formData.directionsUrl.trim() || `https://www.google.com/maps/search/${encodeURIComponent(formData.shopName + ' ' + formData.address)}`,
                 country: formData.country.trim(),
@@ -151,6 +186,13 @@ export default function AddShopPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(shopData),
             })
+            
+            if (!res.ok) {
+                let errMessage = `Failed to save shop to database (${res.status})`
+                const errData = await res.json().catch(() => null)
+                if (errData?.error) errMessage = errData.error
+                throw new Error(errMessage)
+            }
 
             if (!res.ok) {
                 let errMessage = `Failed to save shop to database (${res.status})`
@@ -183,6 +225,7 @@ export default function AddShopPage() {
             }, 1500)
         } catch (err) {
             console.error('Add shop failed:', err)
+            setError(err.message || 'Failed to add shop. Please try again.')
         } finally {
             setIsLoading(false)
         }
@@ -225,7 +268,46 @@ export default function AddShopPage() {
                             name="address"
                             value={formData.address}
                             onChange={handleChange}
-                            placeholder="Street address, City, State/Province"
+                            placeholder="Street address"
+                            disabled={isLoading}
+                        />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="city">City *</label>
+                        <input
+                            type="text"
+                            id="city"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            placeholder="Enter city"
+                            disabled={isLoading}
+                        />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="stateProvince">Province/State *</label>
+                        <input
+                            type="text"
+                            id="stateProvince"
+                            name="stateProvince"
+                            value={formData.stateProvince}
+                            onChange={handleChange}
+                            placeholder="Enter province or state"
+                            disabled={isLoading}
+                        />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="postalCode">Postal Code *</label>
+                        <input
+                            type="text"
+                            id="postalCode"
+                            name="postalCode"
+                            value={formData.postalCode}
+                            onChange={handleChange}
+                            placeholder="Enter postal code"
                             disabled={isLoading}
                         />
                     </div>

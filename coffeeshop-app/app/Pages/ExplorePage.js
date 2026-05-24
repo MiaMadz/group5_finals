@@ -67,11 +67,13 @@ export default function ExplorePage() {
         return matchesSearch && matchesCountry && matchesType
     })
 
-    const displayedBreweries = [...breweries, ...filteredUserShops].sort((a, b) => {
-        const nameA = (a.name || '').toLowerCase()
-        const nameB = (b.name || '').toLowerCase()
-        return nameA.localeCompare(nameB)
-    })
+    const displayedBreweries = page === 1 
+        ? [...filteredUserShops, ...breweries].sort((a, b) => {
+            const nameA = (a.name || '').toLowerCase()
+            const nameB = (b.name || '').toLowerCase()
+            return nameA.localeCompare(nameB)
+        }).slice(0, PER_PAGE)
+        : breweries
 
     const totalPages = meta?.total ? Math.ceil(Number(meta.total) / PER_PAGE) : 1
 
