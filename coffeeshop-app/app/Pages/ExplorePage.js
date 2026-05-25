@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useGetCafesQuery } from '../rtk/breweryApi'
+import { useGetCafesQuery, useGetBreweryCountQuery } from '../rtk/breweryApi'
 import dynamic from 'next/dynamic'
 import Filters from '../Components/Filters'
 import Pagination from '../Components/Pagination'
@@ -30,6 +30,7 @@ export default function ExplorePage() {
     if (type) params.type = type
 
     const { data: cafes = [], isLoading, isError } = useGetCafesQuery(params)
+    const { data: countData } = useGetBreweryCountQuery({ type, country })
 
     useEffect(() => {
         const fetchUserShops = async () => {
@@ -58,12 +59,8 @@ export default function ExplorePage() {
         }))
     ).map(([_, shop]) => shop)
 
-    // apply search and country filters client-side
-    const breweries = cafes.filter((b) => {
-        const matchesName = !search || b.name?.toLowerCase().includes(search.toLowerCase())
-        const matchesCountry = !country || b.country === country
-        return matchesName && matchesCountry
-    })
+    // use API results (already paginated) for display
+    const breweries = cafes || []
 
     const filteredUserShops = uniqueUserShops.filter((shop) => {
         const matchesSearch = !search ||
@@ -74,15 +71,13 @@ export default function ExplorePage() {
         return matchesSearch && matchesCountry && matchesType
     })
 
-    const displayedBreweries = page === 1
-        ? [...filteredUserShops, ...breweries].sort((a, b) => {
-            const nameA = (a.name || '').toLowerCase()
-            const nameB = (b.name || '').toLowerCase()
-            return nameA.localeCompare(nameB)
-        }).slice(0, PER_PAGE)
-        : breweries
+    // total count should come from the backend (count endpoint)
+    const totalFromApi = countData?.total ?? 0
+    const totalCount = Math.max(0, totalFromApi)
+    const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE))
 
-    const totalPages = Math.max(1, Math.ceil((cafes.length || 0) / PER_PAGE))
+    // displayedBreweries = the page of items returned by the API
+    const displayedBreweries = breweries
 
     const handleFilterChange = (setter) => (value) => {
         setter(value)
