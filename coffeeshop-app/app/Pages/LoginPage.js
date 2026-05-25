@@ -35,16 +35,14 @@ export default function LoginPage() {
         return;
       }
 
+      const data = await response.json().catch(() => ({}));
+
       if (response.ok) {
+        if (data.user) {
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+        }
         router.push('/Home');
         return;
-      }
-
-      let data = {};
-      try {
-        data = await response.json();
-      } catch {
-        data = {};
       }
 
       const errorMessage = data.error?.toLowerCase() || '';

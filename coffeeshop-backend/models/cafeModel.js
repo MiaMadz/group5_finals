@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
 class CafeModel {
-    static async getAllModel(page = 1, limit = 20, city = '', type = '', country = '') {
+    static async getAllModel(page = 1, limit = 20, city = '', type = '', isUserShop = null) {
         const offset = (page - 1) * limit;
         let query = 'SELECT * FROM cafes_tbl WHERE 1=1';
         const params = [];
@@ -14,9 +14,9 @@ class CafeModel {
             query += ' AND brewery_type = ?';
             params.push(type);
         }
-        if (country) {
-            query += ' AND country = ?';
-            params.push(country);
+        if (isUserShop !== null) {
+            query += ' AND is_user_shop = ?';
+            params.push(isUserShop ? 1 : 0);
         }
 
         query += ' LIMIT ? OFFSET ?';
@@ -52,26 +52,42 @@ class CafeModel {
         return rows[0];
     }
 
-    static async addCafe(cafe) {
-        const { added_by, name, address, city, state_province, postal_code, country } = cafe;
-        const [result] = await db.query(
-            `INSERT INTO cafes_tbl (added_by, name, address, city, state_province, postal_code, country)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [added_by, name, address, city, state_province, postal_code, country]
-        );
-        return result;
-    }
+static async addCafe(cafe) {
+    const {
+        added_by = null,
+        brewery_api_id = null,
+        name,
+        brewery_type = null,
+        address = null,
+        city = null,
+        state_province = null,
+        postal_code = null,
+        country = null,
+        longitude = null,
+        latitude = null,
+        phone = null,
+        website_url = null,
+        directions_url = null,
+        isUserShop = 0,
+        businessPermitName = null,
+    } = cafe;
 
-    static async importFromApi(cafe) {
-        const { brewery_api_id, name, brewery_type, address, city, state_province, postal_code, country, longitude, latitude, phone, website_url } = cafe;
-        const [result] = await db.query(
-            `INSERT IGNORE INTO cafes_tbl 
-             (brewery_api_id, name, brewery_type, address, city, state_province, postal_code, country, longitude, latitude, phone, website_url)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [brewery_api_id, name, brewery_type, address, city, state_province, postal_code, country, longitude, latitude, phone, website_url]
-        );
-        return result;
-    }
+    const [result] = await db.query(
+        `INSERT INTO cafes_tbl (
+             added_by, brewery_api_id, name, brewery_type, address,
+             city, state_province, postal_code, country, longitude,
+             latitude, phone, website_url, directions_url,
+             is_user_shop, business_permit_name
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+            added_by, brewery_api_id, name, brewery_type, address,
+            city, state_province, postal_code, country, longitude,
+            latitude, phone, website_url, directions_url,
+            isUserShop ? 1 : 0, businessPermitName,
+        ]
+    );
+    return result;
+}
 
     static async getByName(name) {
         const [results] = await db.query('SELECT * FROM cafes_tbl WHERE name = ?', [name]);

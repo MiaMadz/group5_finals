@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useGetCafesQuery } from '../rtk/breweryApi'
 import dynamic from 'next/dynamic'
@@ -20,20 +20,67 @@ export default function ExplorePage() {
     const [selectedLocation, setSelectedLocation] = useState(null)
 
     const favorites = useSelector((state) => state.favorites?.items || [])
+    const userShops = useSelector((state) => state.userShops?.items || [])
+    const [dbUserShops, setDbUserShops] = useState([])
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+
+    // use params for the API query (her approach, works better with backend)
     const params = { page, limit: PER_PAGE }
-    // backend supports `city` and `type`. don't send the UI `country` value as `city` —
-    // that causes zero results when users pick a country. Only send `type` server-side.
     if (type) params.type = type
 
     const { data: cafes = [], isLoading, isError } = useGetCafesQuery(params)
 
-    // apply `country` and `search` filters client-side
-    const filteredByName = cafes.filter((b) => {
+    useEffect(() => {
+        const fetchUserShops = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/cafes?is_user_shop=1&limit=100`)
+                if (!response.ok) {
+                    console.error('Failed to load user shops from backend', response.status)
+                    return
+                }
+                const cafes = await response.json()
+                setDbUserShops(cafes)
+            } catch (error) {
+                console.error('Error fetching user shops from backend:', error)
+            }
+        }
+
+        fetchUserShops()
+    }, [API_URL])
+
+    const allUserShops = [...dbUserShops, ...userShops]
+
+    const uniqueUserShops = Array.from(
+        new Map(allUserShops.map((shop) => {
+            const key = shop.id != null ? shop.id : `${shop.name}-${shop.address}`
+            return [key, shop]
+        }))
+    ).map(([_, shop]) => shop)
+
+    // apply search and country filters client-side
+    const breweries = cafes.filter((b) => {
         const matchesName = !search || b.name?.toLowerCase().includes(search.toLowerCase())
         const matchesCountry = !country || b.country === country
         return matchesName && matchesCountry
     })
+
+    const filteredUserShops = uniqueUserShops.filter((shop) => {
+        const matchesSearch = !search ||
+            shop.name?.toLowerCase().includes(search.toLowerCase()) ||
+            shop.address?.toLowerCase().includes(search.toLowerCase())
+        const matchesCountry = !country || shop.country?.toLowerCase() === country.toLowerCase()
+        const matchesType = !type || shop.brewery_type === type
+        return matchesSearch && matchesCountry && matchesType
+    })
+
+    const displayedBreweries = page === 1
+        ? [...filteredUserShops, ...breweries].sort((a, b) => {
+            const nameA = (a.name || '').toLowerCase()
+            const nameB = (b.name || '').toLowerCase()
+            return nameA.localeCompare(nameB)
+        }).slice(0, PER_PAGE)
+        : breweries
 
     const totalPages = Math.max(1, Math.ceil((cafes.length || 0) / PER_PAGE))
 
@@ -51,8 +98,8 @@ export default function ExplorePage() {
         }
     }
 
-    const displayedBreweries = filteredByName
-    const mappableBreweries = displayedBreweries.filter((b) => b.latitude && b.longitude)
+    const mappableBreweries = breweries.filter((b) => b.latitude && b.longitude)
+    const mappableUserShops = filteredUserShops.filter((b) => b.latitude && b.longitude)
 
     return (
         <div className="explore-page">
@@ -72,8 +119,12 @@ export default function ExplorePage() {
             <div className="explore-layout">
                 <aside className="map-panel">
                     <div className="panel-card panel-card--map">
-                        {mappableBreweries.length > 0 ? (
-                            <BreweryMap breweries={mappableBreweries} selectedBrewery={selectedLocation} />
+                        {mappableBreweries.length > 0 || mappableUserShops.length > 0 ? (
+                            <BreweryMap
+                                breweries={mappableBreweries}
+                                userShops={filteredUserShops}
+                                selectedBrewery={selectedLocation}
+                            />
                         ) : (
                             <div className="empty-state">No breweries available for the map.</div>
                         )}
@@ -96,7 +147,7 @@ export default function ExplorePage() {
                             </div>
                         </div>
                         <div className="panel-card__controls">
-                                <Filters
+                            <Filters
                                 country={country}
                                 type={type}
                                 onCountryChange={handleFilterChange(setCountry)}

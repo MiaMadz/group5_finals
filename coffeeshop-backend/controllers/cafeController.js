@@ -4,13 +4,19 @@ const axios = require('axios');
 class CafeController {
     static async getAll(req, res) {
         try {
-            const page    = parseInt(req.query.page)  || 1;
-            const limit   = parseInt(req.query.limit) || 20;
-            const city    = req.query.city  || '';
-            const type    = req.query.type  || '';
-            const country = req.query.country || '';
+            const page = parseInt(req.query.page) || 1;
+            let limit = req.query.limit ? parseInt(req.query.limit) : 20;
+            const city = req.query.city || '';
+            const type = req.query.type || '';
+            const isUserShop = req.query.is_user_shop !== undefined
+                ? req.query.is_user_shop === '1' || req.query.is_user_shop === 'true'
+                : null;
 
-            const cafes = await CafeModel.getAllModel(page, limit, city, type, country);
+            if (req.query.is_user_shop !== undefined && !req.query.limit) {
+                limit = 100;
+            }
+
+            const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop);
             res.json(cafes);
         } catch (err) {
             res.status(500).json({ error: err.message });
