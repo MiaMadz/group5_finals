@@ -1,10 +1,19 @@
 const UserModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
 
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
 class UserController {
     static async signup(req, res) {
         try {
             const { name, email, password, address, city, state_province, postal_code, country } = req.body;
+
+            if (!PASSWORD_REGEX.test(password)) {
+                return res.status(400).json({
+                    error: 'Password must be at least 8 characters long and include at least one uppercase letter and one number.'
+                });
+            }
+
             const hashedPassword = await bcrypt.hash(password, 10);
 
             await UserModel.createUser({

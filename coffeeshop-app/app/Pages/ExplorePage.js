@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useSearchBreweriesQuery, useGetBreweryCountQuery } from '../rtk/breweryApi'
+import { useGetCafesQuery } from '../rtk/breweryApi'
 import dynamic from 'next/dynamic'
 import Filters from '../Components/Filters'
 import Pagination from '../Components/Pagination'
@@ -24,10 +24,12 @@ export default function ExplorePage() {
     const [dbUserShops, setDbUserShops] = useState([])
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
-    const filters = { name: search, country, type, page, perPage: PER_PAGE }
 
-    const { data: breweries = [], isLoading, isError } = useSearchBreweriesQuery(filters)
-    const { data: meta } = useGetBreweryCountQuery({ name: search, country, type })
+    // use params for the API query (her approach, works better with backend)
+    const params = { page, limit: PER_PAGE }
+    if (type) params.type = type
+
+    const { data: cafes = [], isLoading, isError } = useGetCafesQuery(params)
 
     useEffect(() => {
         const fetchUserShops = async () => {
@@ -56,18 +58,23 @@ export default function ExplorePage() {
         }))
     ).map(([_, shop]) => shop)
 
+    // apply search and country filters client-side
+    const breweries = cafes.filter((b) => {
+        const matchesName = !search || b.name?.toLowerCase().includes(search.toLowerCase())
+        const matchesCountry = !country || b.country === country
+        return matchesName && matchesCountry
+    })
+
     const filteredUserShops = uniqueUserShops.filter((shop) => {
         const matchesSearch = !search ||
             shop.name?.toLowerCase().includes(search.toLowerCase()) ||
             shop.address?.toLowerCase().includes(search.toLowerCase())
-
         const matchesCountry = !country || shop.country?.toLowerCase() === country.toLowerCase()
         const matchesType = !type || shop.brewery_type === type
-
         return matchesSearch && matchesCountry && matchesType
     })
 
-    const displayedBreweries = page === 1 
+    const displayedBreweries = page === 1
         ? [...filteredUserShops, ...breweries].sort((a, b) => {
             const nameA = (a.name || '').toLowerCase()
             const nameB = (b.name || '').toLowerCase()
@@ -75,7 +82,7 @@ export default function ExplorePage() {
         }).slice(0, PER_PAGE)
         : breweries
 
-    const totalPages = meta?.total ? Math.ceil(Number(meta.total) / PER_PAGE) : 1
+    const totalPages = Math.max(1, Math.ceil((cafes.length || 0) / PER_PAGE))
 
     const handleFilterChange = (setter) => (value) => {
         setter(value)
@@ -113,10 +120,10 @@ export default function ExplorePage() {
                 <aside className="map-panel">
                     <div className="panel-card panel-card--map">
                         {mappableBreweries.length > 0 || mappableUserShops.length > 0 ? (
-                            <BreweryMap 
-                                breweries={mappableBreweries} 
+                            <BreweryMap
+                                breweries={mappableBreweries}
                                 userShops={filteredUserShops}
-                                selectedBrewery={selectedLocation} 
+                                selectedBrewery={selectedLocation}
                             />
                         ) : (
                             <div className="empty-state">No breweries available for the map.</div>
@@ -140,7 +147,7 @@ export default function ExplorePage() {
                             </div>
                         </div>
                         <div className="panel-card__controls">
-                                <Filters
+                            <Filters
                                 country={country}
                                 type={type}
                                 onCountryChange={handleFilterChange(setCountry)}

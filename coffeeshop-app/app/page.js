@@ -1,9 +1,5 @@
-import HomePage from './Pages/HomePage'
+import { redirect } from 'next/navigation'
 
 export default function Home() {
-    return (
-        <main>
-            <HomePage />
-        </main>
-    )
+    redirect('/Login')
 }

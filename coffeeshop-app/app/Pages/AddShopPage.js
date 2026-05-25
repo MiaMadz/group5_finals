@@ -39,6 +39,7 @@ export default function AddShopPage() {
         businessPermit: null,
     })
     const [previewUrl, setPreviewUrl] = useState('')
+    const [currentUser, setCurrentUser] = useState(null)
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -80,6 +81,17 @@ export default function AddShopPage() {
             URL.revokeObjectURL(url)
         }
     }, [formData.businessPermit])
+
+    useEffect(() => {
+        try {
+            const storedUser = window.localStorage.getItem('currentUser')
+            if (storedUser) {
+                setCurrentUser(JSON.parse(storedUser))
+            }
+        } catch (err) {
+            console.warn('Could not load current user from localStorage', err)
+        }
+    }, [])
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
@@ -151,6 +163,10 @@ export default function AddShopPage() {
             setError('Business phone number is required')
             return
         }
+        if (!currentUser) {
+            setError('You must be logged in to add a shop.')
+            return
+        }
         if (!formData.businessPermit) {
             setError('A photo of your business permit is required')
             return
@@ -178,6 +194,7 @@ export default function AddShopPage() {
                 country: formData.country.trim(),
                 brewery_type: formData.shopType,
                 phone: formData.phone.trim(),
+                added_by: currentUser?.id || null,
                 latitude: coords.latitude,
                 longitude: coords.longitude,
                 isUserShop: true,

@@ -800,3 +800,4 @@ button, input, select { font: inherit; }
   .explore-page, .favorite-page { padding: 16px; }
   .explore-header, .favorite-header { flex-direction: column; align-items: stretch; }
 }
+

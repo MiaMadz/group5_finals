@@ -31,6 +31,8 @@ export default function Navbar() {
             {label}
         </Link>
     )
+    const currentPath = pathname?.toLowerCase() || ''
+    if (currentPath.startsWith('/login') || currentPath.startsWith('/signup')) return null
 
     const styles = {
         nav: {

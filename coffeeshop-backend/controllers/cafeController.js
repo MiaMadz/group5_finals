@@ -23,6 +23,19 @@ class CafeController {
         }
     }
 
+    static async getCount(req, res) {
+        try {
+            const city    = req.query.city  || '';
+            const type    = req.query.type  || '';
+            const country = req.query.country || '';
+
+            const total = await CafeModel.getCountModel(city, type, country);
+            res.json({ total });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
     static async getById(req, res) {
         try {
             const cafe = await CafeModel.getById(req.params.id);

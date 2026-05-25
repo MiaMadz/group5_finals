@@ -26,6 +26,27 @@ class CafeModel {
         return rows;
     }
 
+    static async getCountModel(city = '', type = '', country = '') {
+        let query = 'SELECT COUNT(*) AS total FROM cafes_tbl WHERE 1=1';
+        const params = [];
+
+        if (city) {
+            query += ' AND city = ?';
+            params.push(city);
+        }
+        if (type) {
+            query += ' AND brewery_type = ?';
+            params.push(type);
+        }
+        if (country) {
+            query += ' AND country = ?';
+            params.push(country);
+        }
+
+        const [rows] = await db.query(query, params);
+        return rows[0]?.total || 0;
+    }
+
     static async getById(id) {
         const [rows] = await db.query('SELECT * FROM cafes_tbl WHERE id = ?', [id]);
         return rows[0];
