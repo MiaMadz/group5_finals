@@ -28,6 +28,8 @@ export default function ExplorePage() {
     // use params for the API query (her approach, works better with backend)
     const params = { page, limit: PER_PAGE }
     if (type) params.type = type
+    if (country) params.country = country
+    if (search) params.search = search 
 
     const { data: cafes = [], isLoading, isError } = useGetCafesQuery(params)
     const { data: countData } = useGetBreweryCountQuery({ type, country })

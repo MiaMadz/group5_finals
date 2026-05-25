@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux'
 import dynamic from 'next/dynamic'
 import BreweryCard from '../Components/BreweryCard'
 import Filters from '../Components/Filters' // Import your existing component
+import Pagination from '../Components/Pagination'
 import 'leaflet/dist/leaflet.css'
 
 const BreweryMap = dynamic(() => import('../Components/BreweryMap'), { ssr: false })
@@ -12,24 +13,25 @@ export default function FavoritePage() {
     const [search, setSearch] = useState('')
     const [country, setCountry] = useState('')
     const [type, setType] = useState('')
+    const [page, setPage] = useState(1)
     const [selectedLocation, setSelectedLocation] = useState(null)
     
     const favorites = useSelector((state) => state.favorites.items || [])
 
     // Handler to match ExplorePage's filter logic
+    const PER_PAGE = 8
+
     const handleFilterChange = (setter) => (value) => {
         setter(value)
+        setPage(1)
     }
 
     const filteredFavorites = useMemo(() => {
         return favorites.filter((brewery) => {
             const matchesSearch = brewery.name.toLowerCase().includes(search.toLowerCase()) ||
                                  (brewery.city && brewery.city.toLowerCase().includes(search.toLowerCase()))
-            
             const matchesType = !type || type === 'all' || brewery.brewery_type === type
-            
             const matchesCountry = !country || brewery.country === country
-
             return matchesSearch && matchesType && matchesCountry
         })
     }, [favorites, search, type, country])
@@ -38,6 +40,13 @@ export default function FavoritePage() {
         filteredFavorites.filter((brewery) => brewery.latitude && brewery.longitude),
         [filteredFavorites]
     )
+
+    const displayedFavorites = useMemo(() => {
+        const start = (page - 1) * PER_PAGE
+        return filteredFavorites.slice(start, start + PER_PAGE)
+    }, [filteredFavorites, page])
+
+    const totalPages = Math.max(1, Math.ceil(filteredFavorites.length / PER_PAGE))
 
     const handleSelectBrewery = (brewery) => {
         if (brewery?.latitude && brewery?.longitude) {
@@ -108,15 +117,20 @@ export default function FavoritePage() {
                             {filteredFavorites.length === 0 ? (
                                 <div className="empty-state">No breweries match your search.</div>
                             ) : (
-                                <ul className="brewery-list">
-                                    {filteredFavorites.map((brewery) => (
-                                        <BreweryCard
-                                            key={brewery.id}
-                                            brewery={brewery}
-                                            onSelect={() => handleSelectBrewery(brewery)}
-                                        />
-                                    ))}
-                                </ul>
+                                <>
+                                    <ul className="brewery-list">
+                                        {displayedFavorites.map((brewery) => (
+                                            <BreweryCard
+                                                key={brewery.id}
+                                                brewery={brewery}
+                                                onSelect={() => handleSelectBrewery(brewery)}
+                                            />
+                                        ))}
+                                    </ul>
+                                    <div className="pagination-wrapper">
+                                        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+                                    </div>
+                                </>
                             )}
                         </div>
                     </div>

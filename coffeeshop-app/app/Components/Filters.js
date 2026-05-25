@@ -3,26 +3,30 @@
 const BREWERY_TYPES = ['micro', 'nano', 'regional', 'brewpub', 'large', 'planning', 'bar', 'contract', 'proprietor', 'taproom']
 const COUNTRIES = [
     'United States',
-    'Australia',
-    'Canada',
     'South Africa',
     'Ireland',
+    'Australia',
+    'Canada',
     'England',
-    'South Korea',
-    'Poland',
-    'Singapore',
-    'Austria',
-    'Portugal',
     'Japan',
-    'Germany',
-    'Sweden',
-    'Scotland',
+    'South Korea',
+    'Portugal',
+    'Singapore',
+    'Netherlands',
+    'Poland',
+    'Finland',
     'Italy',
+    'Germany',
     'France',
-    'Philippines'
+    'Sweden',
+    'Isle of Man',
+    'Scotland',
+    'Austria',
+    'Ukraine',
+    'Philippine'
 ]
 
-export default function Filters({ country, type, onCountryChange, onTypeChange }) {
+export default function Filters({ countries = COUNTRIES, country, type, onCountryChange, onTypeChange }) {
     return (
         <div className="filters-row filters-row--compact">
             <div className="filter-control">
@@ -48,7 +52,7 @@ export default function Filters({ country, type, onCountryChange, onTypeChange }
                     onChange={(e) => onCountryChange(e.target.value)}
                 >
                     <option value="">Filter by country</option>
-                    {COUNTRIES.map((c) => (
+                    {countries.map((c) => (
                         <option key={c} value={c}>{c}</option>
                     ))}
                 </select>

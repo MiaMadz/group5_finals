@@ -312,10 +312,10 @@
 
 .submitBtn {
     padding: 14px 20px;
-    background: #E8A94D;
-    color: #FFFFFF;
+    background: linear-gradient(180deg, #f0b75f 0%, #d18b2c 100%);
+    color: #12110d;
     border: none;
-    border-radius: 10px;
+    border-radius: 16px;
     font-size: 16px;
     font-weight: 700;
     font-family: 'Playfair Display', serif;

@@ -52,6 +52,16 @@ export default function AddShopPage() {
 
     const handleFileChange = (e) => {
         const file = e.target.files?.[0] || null
+
+        if (file && !file.type.startsWith('image/')) {
+            setError('Only image files are allowed for business permits.')
+            setFormData(prev => ({
+                ...prev,
+                businessPermit: null,
+            }))
+            return
+        }
+
         setFormData(prev => ({
             ...prev,
             businessPermit: file,
@@ -217,13 +227,6 @@ export default function AddShopPage() {
                 throw new Error(errMessage)
             }
 
-            if (!res.ok) {
-                let errMessage = `Failed to save shop to database (${res.status})`
-                const errData = await res.json().catch(() => null)
-                if (errData?.error) errMessage = errData.error
-                throw new Error(errMessage)
-            }
-
             const saved = await res.json()
             console.log('Saved cafe response:', saved)
 
@@ -291,7 +294,7 @@ export default function AddShopPage() {
                             name="address"
                             value={formData.address}
                             onChange={handleChange}
-                            placeholder="Street address"
+                            placeholder="e.g. 123 Main St, Makati City"
                             disabled={isLoading}
                         />
                     </div>

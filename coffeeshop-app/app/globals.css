@@ -768,8 +768,10 @@ button, input, select { font: inherit; }
   gap: 14px;
 }
 .favorite-page .brewery-list-wrapper {
-  overflow: visible;
-  min-height: unset;
+  overflow-y: auto;
+  min-height: 0;
+  max-height: calc(100vh - 360px);
+  padding-right: 6px;
 }
 
 .screen-reader-text {

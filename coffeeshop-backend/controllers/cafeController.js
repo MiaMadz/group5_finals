@@ -7,6 +7,7 @@ class CafeController {
             const page = parseInt(req.query.page) || 1;
             let limit = req.query.limit ? parseInt(req.query.limit) : 20;
             const city = req.query.city || '';
+            const country = req.query.country || '';
             const type = req.query.type || '';
             const isUserShop = req.query.is_user_shop !== undefined
                 ? req.query.is_user_shop === '1' || req.query.is_user_shop === 'true'
@@ -16,7 +17,7 @@ class CafeController {
                 limit = 100;
             }
 
-            const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop);
+            const cafes = await CafeModel.getAllModel(page, limit, city, country, type, isUserShop);
             res.json(cafes);
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -31,6 +32,24 @@ class CafeController {
 
             const total = await CafeModel.getCountModel(city, type, country);
             res.json({ total });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    static async getCountryCount(req, res) {
+        try {
+            const total = await CafeModel.getCountryCountModel();
+            res.json({ total });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    static async getCountries(req, res) {
+        try {
+            const countries = await CafeModel.getCountriesModel();
+            res.json(countries);
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
