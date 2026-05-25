@@ -1,7 +1,22 @@
 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import dynamic from 'next/dynamic'
+import { useEffect, useMemo, useState } from 'react'
+import { useMap } from 'react-leaflet'
 import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+
+const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
+    ssr: false,
+})
+const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {
+    ssr: false,
+})
+const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), {
+    ssr: false,
+})
+const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
+    ssr: false,
+})
 
 function MapCenter({ center, zoom }) {
     const map = useMap()
@@ -16,11 +31,13 @@ function MapCenter({ center, zoom }) {
 }
 
 export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
-    const mapRef = useRef(null)
     const [mounted, setMounted] = useState(false)
+    const [ready, setReady] = useState(false)
 
     useEffect(() => {
         setMounted(true)
+        const timer = window.requestAnimationFrame(() => setReady(true))
+        return () => window.cancelAnimationFrame(timer)
     }, [])
 
     const breweryIcon = useMemo(() => L.icon({
@@ -41,7 +58,10 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
         shadowSize: [0, 0],
     }), [])
 
-    if (!mounted) return null
+    if (!mounted || !ready) return null
+
+    // Ensure Leaflet is available in the browser before attempting to render
+    if (typeof window === 'undefined' || !L || !L.DomUtil) return null
 
     // Combine breweries and user shops, then keep only valid coordinates
     const allLocations = [
@@ -82,7 +102,7 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
     }
 
     return (
-        <div ref={mapRef} style={{ height: '100%', width: '100%' }}>
+        <div style={{ height: '100%', width: '100%' }}>
             <MapContainer
                 key={mapKey}
                 center={selectedCenter || defaultCenter}
