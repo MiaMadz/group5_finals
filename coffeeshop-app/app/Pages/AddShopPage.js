@@ -33,6 +33,7 @@ export default function AddShopPage() {
         postalCode: '',
         websiteUrl: '',
         directionsUrl: '',
+        phone: '',
         country: '',
         shopType: '',
         businessPermit: null,
@@ -146,6 +147,10 @@ export default function AddShopPage() {
             setError('Shop type is required')
             return
         }
+        if (!formData.phone.trim()) {
+            setError('Business phone number is required')
+            return
+        }
         if (!formData.businessPermit) {
             setError('A photo of your business permit is required')
             return
@@ -172,6 +177,7 @@ export default function AddShopPage() {
                 directions_url: formData.directionsUrl.trim() || `https://www.google.com/maps/search/${encodeURIComponent(formData.shopName + ' ' + formData.address)}`,
                 country: formData.country.trim(),
                 brewery_type: formData.shopType,
+                phone: formData.phone.trim(),
                 latitude: coords.latitude,
                 longitude: coords.longitude,
                 isUserShop: true,
@@ -339,6 +345,19 @@ export default function AddShopPage() {
                                 <option key={type.value} value={type.value}>{type.label}</option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="phone">Business Phone *</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder="Enter business phone number"
+                            disabled={isLoading}
+                        />
                     </div>
 
                     <div className={styles.formGroup}>
