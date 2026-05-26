@@ -25,12 +25,13 @@ export default function ExplorePage() {
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
 
-    // use params for the API query (her approach, works better with backend)
     const params = { page, limit: PER_PAGE }
     if (type) params.type = type
+    if (search) params.name = search
+    if (country) params.country = country
 
     const { data: cafes = [], isLoading, isError } = useGetCafesQuery(params)
-    const { data: countData } = useGetBreweryCountQuery({ type, country })
+    const { data: countData } = useGetBreweryCountQuery({ type, country, name: search })
 
     useEffect(() => {
         const fetchUserShops = async () => {
@@ -59,7 +60,6 @@ export default function ExplorePage() {
         }))
     ).map(([_, shop]) => shop)
 
-    // use API results (already paginated) for display
     const breweries = cafes || []
 
     const filteredUserShops = uniqueUserShops.filter((shop) => {
@@ -71,12 +71,10 @@ export default function ExplorePage() {
         return matchesSearch && matchesCountry && matchesType
     })
 
-    // total count should come from the backend (count endpoint)
     const totalFromApi = countData?.total ?? 0
     const totalCount = Math.max(0, totalFromApi)
     const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE))
 
-    // displayedBreweries = the page of items returned by the API
     const displayedBreweries = breweries
 
     const handleFilterChange = (setter) => (value) => {
@@ -158,13 +156,21 @@ export default function ExplorePage() {
 
                         <div className="brewery-list-wrapper">
                             <ul className="brewery-list">
-                                {displayedBreweries.map((brewery) => (
-                                    <BreweryCard
-                                        key={brewery.id}
-                                        brewery={brewery}
-                                        onSelect={() => handleSelectBrewery(brewery)}
-                                    />
-                                ))}
+                                {isLoading ? (
+                                    <p style={{ padding: '1rem' }}>Loading...</p>
+                                ) : isError ? (
+                                    <p style={{ padding: '1rem' }}>Failed to load breweries.</p>
+                                ) : displayedBreweries.length === 0 ? (
+                                    <p style={{ padding: '1rem' }}>No results found.</p>
+                                ) : (
+                                    displayedBreweries.map((brewery) => (
+                                        <BreweryCard
+                                            key={brewery.id}
+                                            brewery={brewery}
+                                            onSelect={() => handleSelectBrewery(brewery)}
+                                        />
+                                    ))
+                                )}
                             </ul>
                         </div>
 

@@ -7,15 +7,19 @@ import 'leaflet/dist/leaflet.css'
 
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
     ssr: false,
+    loading: () => null,
 })
 const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {
     ssr: false,
+    loading: () => null,
 })
 const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), {
     ssr: false,
+    loading: () => null,
 })
 const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
     ssr: false,
+    loading: () => null,
 })
 
 function MapCenter({ center, zoom }) {
