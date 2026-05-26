@@ -1,29 +1,9 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { useMap, MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-<<<<<<< HEAD
-const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
-    ssr: false,
-    loading: () => null,
-})
-const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {
-    ssr: false,
-    loading: () => null,
-})
-const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), {
-    ssr: false,
-    loading: () => null,
-})
-const Popup = dynamic(() => import('react-leaflet').then((mod) => mod.Popup), {
-    ssr: false,
-    loading: () => null,
-})
-
-=======
->>>>>>> 29103bf01d7113563d5e7d3e6dae4bf618340acb
 function MapCenter({ center, zoom }) {
     const map = useMap()
 
@@ -39,21 +19,12 @@ function MapCenter({ center, zoom }) {
 export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
     const [mounted, setMounted] = useState(false)
     const [ready, setReady] = useState(false)
-    const [mapInstance, setMapInstance] = useState(null)
 
     useEffect(() => {
         setMounted(true)
         const timer = window.requestAnimationFrame(() => setReady(true))
         return () => window.cancelAnimationFrame(timer)
     }, [])
-
-    useEffect(() => {
-        return () => {
-            if (mapInstance) {
-                mapInstance.remove()
-            }
-        }
-    }, [mapInstance])
 
     const breweryIcon = useMemo(() => L.icon({
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -125,7 +96,6 @@ export default function BreweryMap({ breweries, selectedBrewery, userShops }) {
                 scrollWheelZoom={true}
                 className="brewery-map"
                 style={{ height: '100%', width: '100%' }}
-                whenCreated={setMapInstance}
             >
             <TileLayer
                 attribution='&copy; OpenStreetMap contributors'
