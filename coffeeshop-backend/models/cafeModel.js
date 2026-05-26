@@ -10,6 +10,10 @@ class CafeModel {
             query += ' AND city = ?';
             params.push(city);
         }
+        if (country) {
+            query += ' AND country = ?';
+            params.push(country);
+        }
         if (type) {
             query += ' AND brewery_type = ?';
             params.push(type);
@@ -59,6 +63,22 @@ class CafeModel {
         return rows[0]?.total || 0;
     }
 
+    static async getCountryCountModel() {
+        const [rows] = await db.query(
+            'SELECT COUNT(DISTINCT country) AS total FROM cafes_tbl WHERE country IS NOT NULL AND country != ? LIMIT 1',
+            ['']
+        );
+        return rows[0]?.total || 0;
+    }
+
+    static async getCountriesModel() {
+        const [rows] = await db.query(
+            'SELECT DISTINCT country FROM cafes_tbl WHERE country IS NOT NULL AND TRIM(country) != ? ORDER BY country ASC',
+            ['']
+        );
+        return rows.map((row) => row.country);
+    }
+
     static async getById(id) {
         const [rows] = await db.query('SELECT * FROM cafes_tbl WHERE id = ?', [id]);
         return rows[0];
@@ -97,6 +117,37 @@ class CafeModel {
                 city, state_province, postal_code, country, longitude,
                 latitude, phone, website_url, directions_url,
                 isUserShop ? 1 : 0, businessPermitName, businessPermitPath,
+            ]
+        );
+        return result;
+    }
+
+    static async importFromApi(cafe) {
+        const {
+            brewery_api_id = null,
+            name,
+            brewery_type = null,
+            address = null,
+            city = null,
+            state_province = null,
+            postal_code = null,
+            country = null,
+            longitude = null,
+            latitude = null,
+            phone = null,
+            website_url = null,
+        } = cafe;
+
+        const [result] = await db.query(
+            `INSERT INTO cafes_tbl (
+                 brewery_api_id, name, brewery_type, address,
+                 city, state_province, postal_code, country,
+                 longitude, latitude, phone, website_url
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                brewery_api_id, name, brewery_type, address,
+                city, state_province, postal_code, country,
+                longitude, latitude, phone, website_url,
             ]
         );
         return result;

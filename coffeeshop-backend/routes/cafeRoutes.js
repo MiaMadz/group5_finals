@@ -33,6 +33,8 @@ const upload = multer({
 
 router.get('/', CafeController.getAll);
 router.get('/count', CafeController.getCount);
+router.get('/countries', CafeController.getCountries);
+router.get('/countries/count', CafeController.getCountryCount);
 router.get('/:id', CafeController.getById);
 router.post('/', upload.single('businessPermit'), CafeController.addCafe);
 router.post('/import', CafeController.importFromApi);

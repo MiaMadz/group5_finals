@@ -42,6 +42,9 @@ CREATE TABLE `cafes_tbl` (
   `latitude` float DEFAULT NULL,
   `phone` varchar(50) DEFAULT NULL,
   `website_url` text DEFAULT NULL,
+  `directions_url` varchar(255) DEFAULT NULL,
+  `is_user_shop` tinyint(1) NOT NULL DEFAULT 0,
+  `business_permit_name` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

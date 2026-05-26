@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSearchBreweriesQuery, useGetBreweryCountQuery } from '../rtk/breweryApi';
+import { useSearchBreweriesQuery, useGetBreweryCountQuery, useGetCountryCountQuery } from '../rtk/breweryApi';
 import { toggleFavorite } from '../rtk/favoritesSlice';
 
 const COUNTRIES = [
@@ -15,7 +15,9 @@ export default function HomePage() {
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.items || []);
   const { data: totalMeta } = useGetBreweryCountQuery();
+  const { data: countryMeta } = useGetCountryCountQuery();
   const totalBreweries = Number(totalMeta?.total) || 0;
+  const totalCountries = Number(countryMeta?.total) || COUNTRIES.length;
 
   const handleScroll = (direction, countryIndex) => {
     const element = document.getElementById(`carousel-${countryIndex}`);
@@ -56,7 +58,7 @@ export default function HomePage() {
             <div className="hero__stat-label">Breweries listed</div>
           </div>
           <div className="hero__stat">
-            <div className="hero__stat-num">{COUNTRIES.length}</div>
+            <div className="hero__stat-num">{totalCountries.toLocaleString()}</div>
             <div className="hero__stat-label">Countries covered</div>
           </div>
           <div className="hero__stat">

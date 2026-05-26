@@ -26,6 +26,16 @@ export const breweryApi = createApi({
             providesTags: ['Brewery'],
         }),
 
+        getCountryCount: builder.query({
+            query: () => '/countries/count',
+            providesTags: ['Brewery'],
+        }),
+
+        getCountries: builder.query({
+            query: () => '/countries',
+            providesTags: ['Brewery'],
+        }),
+
         getBreweryCount: builder.query({
             query: (params = {}) => {
                 const queryParams = { ...params };
@@ -69,6 +79,8 @@ export const {
     useGetCafesQuery,
     useSearchBreweriesQuery,
     useGetBreweryCountQuery,
+    useGetCountryCountQuery,
+    useGetCountriesQuery,
     useGetCafeByIdQuery,
     useAddCafeMutation,
     useUpdateCafeMutation,

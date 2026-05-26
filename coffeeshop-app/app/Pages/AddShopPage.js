@@ -66,8 +66,25 @@ export default function AddShopPage() {
 
     const handleFileChange = (e) => {
         const file = e.target.files?.[0] || null
+<<<<<<< HEAD
         setFormData(prev => ({ ...prev, businessPermit: file }))
         setPermitInfo(null)
+=======
+
+        if (file && !file.type.startsWith('image/')) {
+            setError('Only image files are allowed for business permits.')
+            setFormData(prev => ({
+                ...prev,
+                businessPermit: null,
+            }))
+            return
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            businessPermit: file,
+        }))
+>>>>>>> 29103bf01d7113563d5e7d3e6dae4bf618340acb
         setError('')
     }
 
@@ -256,13 +273,6 @@ export default function AddShopPage() {
                 body: form, // No Content-Type header — browser sets it automatically
             })
 
-            if (!res.ok) {
-                let errMessage = `Failed to save shop to database (${res.status})`
-                const errData = await res.json().catch(() => null)
-                if (errData?.error) errMessage = errData.error
-                throw new Error(errMessage)
-            }
-
             const saved = await res.json()
 
             const shopToDispatch = {
@@ -320,12 +330,27 @@ export default function AddShopPage() {
                                 disabled={isLoading || isVerifying} />
                         </div>
 
+<<<<<<< HEAD
                         <div className={styles.formGroup}>
                             <label htmlFor="address">Address *</label>
                             <input type="text" id="address" name="address" value={formData.address}
                                 onChange={handleChange} placeholder="Street address"
                                 disabled={isLoading || isVerifying} />
                         </div>
+=======
+                    <div className={styles.formGroup}>
+                        <label htmlFor="address">Address *</label>
+                        <input
+                            type="text"
+                            id="address"
+                            name="address"
+                            value={formData.address}
+                            onChange={handleChange}
+                            placeholder="e.g. 123 Main St, Makati City"
+                            disabled={isLoading}
+                        />
+                    </div>
+>>>>>>> 29103bf01d7113563d5e7d3e6dae4bf618340acb
 
                         <div className={styles.formGroup}>
                             <label htmlFor="city">City *</label>

@@ -102,7 +102,7 @@ export default function SignUpPage() {
             {success && <div className={styles.successMessage}>{success}</div>}
             <div className={styles.fieldGroup}>
               <label className={styles.fieldLabel} htmlFor="name">
-                Full Name
+                Full Name *
               </label>
               <input
                 id="name"
@@ -117,7 +117,7 @@ export default function SignUpPage() {
 
             <div className={styles.fieldGroup}>
               <label className={styles.fieldLabel} htmlFor="email">
-                Email
+                Email *
               </label>
               <input
                 id="email"
@@ -132,7 +132,7 @@ export default function SignUpPage() {
 
             <div className={styles.fieldGroup}>
               <label className={styles.fieldLabel} htmlFor="password">
-                Password
+                Password *
               </label>
               <div className={styles.passwordWrapper}>
                 <input
@@ -161,7 +161,7 @@ export default function SignUpPage() {
 
             <div className={styles.fieldGroup}>
               <label className={styles.fieldLabel} htmlFor="confirmPassword">
-                Confirm Password
+                Confirm Password *
               </label>
               <div className={styles.passwordWrapper}>
                 <input

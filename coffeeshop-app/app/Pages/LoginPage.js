@@ -11,8 +11,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const router = useRouter();
 
   const handleClose = () => {
@@ -22,6 +24,12 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+
+    if (!acceptedTerms) {
+      setError('⚠️ You must agree to the terms and conditions before logging in.');
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/api/users/login`, {
@@ -29,11 +37,6 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
-      if (!acceptedTerms) {
-        setError('⚠️ You must agree to the terms and conditions before logging in.');
-        return;
-      }
 
       const data = await response.json().catch(() => ({}));
 
@@ -63,6 +66,20 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!email.trim()) {
+      setError('⚠️ Please enter your email to reset your password.');
+      return;
+    }
+
+    // This is a client-side placeholder until a reset endpoint is implemented.
+    setSuccess('If an account exists for that email, a reset link has been sent.');
+  };
+
   if (!isVisible) {
     return (
       <main className={styles.loginPage}>
@@ -86,11 +103,15 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <form className={styles.loginForm} onSubmit={handleLogin}>
+          <form
+            className={styles.loginForm}
+            onSubmit={forgotPasswordMode ? handleForgotPasswordSubmit : handleLogin}
+          >
             {error && <div className={styles.errorMessage}>{error}</div>}
+            {success && <div className={styles.successMessage}>{success}</div>}
             <div className={styles.fieldGroup}>
               <label className={styles.fieldLabel} htmlFor="email">
-                Email
+                Email *
               </label>
               <input
                 id="email"
@@ -103,55 +124,81 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className={styles.fieldGroup}>
-              <div className={styles.fieldLabelRow}>
-                <span>Password</span>
-                <a className={styles.linkButton} href="#">
-                  Forgot Password?
-                </a>
-              </div>
-              <div className={styles.passwordWrapper}>
-                <input
-                  id="password"
-                  className={styles.fieldInput}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+            {!forgotPasswordMode ? (
+              <>
+                <div className={styles.fieldGroup}>
+                  <div className={styles.fieldLabelRow}>
+                    <span>Password *</span>
+                    <button
+                      type="button"
+                      className={styles.linkButton}
+                      onClick={() => {
+                        setForgotPasswordMode(true)
+                        setError('')
+                        setSuccess('')
+                      }}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                  <div className={styles.passwordWrapper}>
+                    <input
+                      id="password"
+                      className={styles.fieldInput}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className={styles.passwordToggle}
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      <img
+                        src={showPassword ? '/images/show.png' : '/images/hidden.png'}
+                        alt={showPassword ? 'Hide password' : 'Show password'}
+                        className={styles.toggleIcon}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.actions}>
+                  <label className={styles.rememberMe}>
+                    <input
+                      type="checkbox"
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    />
+                    I agree to the terms and conditions
+                  </label>
+                </div>
+              </>
+            ) : (
+              <div className={styles.fieldGroup}>
                 <button
                   type="button"
-                  className={styles.passwordToggle}
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className={styles.linkButton}
+                  onClick={() => {
+                    setForgotPasswordMode(false)
+                    setError('')
+                    setSuccess('')
+                  }}
                 >
-                  <img
-                    src={showPassword ? "/images/show.png" : "/images/hidden.png"}
-                    alt={showPassword ? "Hide password" : "Show password"}
-                    className={styles.toggleIcon}
-                  />
+                  Back to Login
                 </button>
               </div>
-            </div>
-
-            <div className={styles.actions}>
-              <label className={styles.rememberMe}>
-                <input
-                  type="checkbox"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                />
-                I agree to the terms and conditions
-              </label>
-            </div>
+            )}
 
             <button
               type="submit"
               className={styles.loginButton}
-              disabled={!acceptedTerms}
+              disabled={!forgotPasswordMode && !acceptedTerms}
             >
-              Login
+              {forgotPasswordMode ? 'Send Reset Link' : 'Login'}
             </button>
           </form>
 

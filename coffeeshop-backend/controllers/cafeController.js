@@ -7,6 +7,7 @@ class CafeController {
             const page = parseInt(req.query.page) || 1;
             let limit = req.query.limit ? parseInt(req.query.limit) : 20;
             const city = req.query.city || '';
+            const country = req.query.country || '';
             const type = req.query.type || '';
             const name = req.query.name || '';
             const country = req.query.country || '';
@@ -18,7 +19,11 @@ class CafeController {
                 limit = 100;
             }
 
+<<<<<<< HEAD
             const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop, name, country);
+=======
+            const cafes = await CafeModel.getAllModel(page, limit, city, country, type, isUserShop);
+>>>>>>> 29103bf01d7113563d5e7d3e6dae4bf618340acb
             res.json(cafes);
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -34,6 +39,24 @@ class CafeController {
 
             const total = await CafeModel.getCountModel(city, type, country, name);
             res.json({ total });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    static async getCountryCount(req, res) {
+        try {
+            const total = await CafeModel.getCountryCountModel();
+            res.json({ total });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    static async getCountries(req, res) {
+        try {
+            const countries = await CafeModel.getCountriesModel();
+            res.json(countries);
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
