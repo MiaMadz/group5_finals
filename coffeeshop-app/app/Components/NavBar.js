@@ -10,7 +10,12 @@ export default function Navbar() {
     const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
     const favorites = useSelector((state) => state.favorites?.items || [])
-    useEffect(() => { setMounted(true) }, [])
+    useEffect(() => { 
+        setMounted(true)
+    }, [])
+
+    // derive login state directly from localStorage to avoid stale state
+    const isLoggedIn = typeof window !== 'undefined' && !!localStorage.getItem('currentUser')
 
     const navLink = (to, label) => (
         <Link href={to} style={{
@@ -104,6 +109,22 @@ export default function Navbar() {
                             {favorites.length}
                         </span>
                     )}
+                </Link>
+
+                <Link href={isLoggedIn ? "/Profile" : "/Login"} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'transform 0.2s ease',
+                }}>
+                    <img 
+                        src="/images/user.png" 
+                        alt="User Profile" 
+                        style={{
+                            width: '28px',
+                            height: '28px',
+                            cursor: 'pointer'
+                        }}
+                    />
                 </Link>
             </div>
         </nav>

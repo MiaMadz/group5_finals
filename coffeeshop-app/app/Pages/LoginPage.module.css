@@ -5,9 +5,9 @@
   justify-content: center;
   padding: 24px;
   background-image: url('/images/login_bg.png');
-  background-size: auto;
+  background-size: cover;
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: center center;
   background-attachment: fixed;
   color: #f5efe6;
   overflow: hidden;

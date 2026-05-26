@@ -8,7 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 export default function SignUpPage() {
-  const [isVisible, setIsVisible] = useState(true);
+  // page always visible; removed floating/show button and close control
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,9 +20,7 @@ export default function SignUpPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const router = useRouter();
 
-  const handleClose = () => {
-    setIsVisible(false);
-  };
+  // close handler removed
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -74,17 +72,7 @@ export default function SignUpPage() {
     }
   };
 
-  if (!isVisible) {
-    return (
-      <main className={styles.loginPage}>
-        <div className={styles.showLogin}>
-          <button className={styles.showLoginButton} onClick={() => setIsVisible(true)}>
-            Sign Up Here
-          </button>
-        </div>
-      </main>
-    );
-  }
+  // always render the page
 
   return (
     <main className={styles.loginPage}>
@@ -92,9 +80,7 @@ export default function SignUpPage() {
         <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <h1 className={styles.loginTitle}>Sign Up</h1>
-            <button className={styles.closeButton} type="button" aria-label="Close" onClick={handleClose}>
-              ×
-            </button>
+            {/* close button removed */}
           </div>
 
           <form className={styles.loginForm} onSubmit={handleSignUp}>
@@ -204,7 +190,7 @@ export default function SignUpPage() {
               className={styles.loginButton}
               disabled={!acceptedTerms}
             >
-              Sign Up
+              SIGN UP
             </button>
           </form>
 

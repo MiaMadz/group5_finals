@@ -7,7 +7,7 @@ import styles from './LoginPage.module.css';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function LoginPage() {
-  const [isVisible, setIsVisible] = useState(true);
+  // page always visible; removed floating/show button and close control
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,9 +17,6 @@ export default function LoginPage() {
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const router = useRouter();
 
-  const handleClose = () => {
-    setIsVisible(false);
-  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -80,17 +77,7 @@ export default function LoginPage() {
     setSuccess('If an account exists for that email, a reset link has been sent.');
   };
 
-  if (!isVisible) {
-    return (
-      <main className={styles.loginPage}>
-        <div className={styles.showLogin}>
-          <button className={styles.showLoginButton} onClick={() => setIsVisible(true)}>
-            Login Here
-          </button>
-        </div>
-      </main>
-    );
-  }
+  // always render the page
 
   return (
     <main className={styles.loginPage}>
@@ -98,9 +85,7 @@ export default function LoginPage() {
         <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <h1 className={styles.loginTitle}>Login</h1>
-            <button className={styles.closeButton} type="button" aria-label="Close" onClick={handleClose}>
-              ×
-            </button>
+            {/* close button removed */}
           </div>
 
           <form

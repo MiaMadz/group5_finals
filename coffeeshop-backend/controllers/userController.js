@@ -62,9 +62,49 @@ class UserController {
 
     static async updateUser(req, res) {
         try {
-            const affected = await UserModel.updateUser(req.params.id, req.body);
+            const id = req.params.id;
+            const existing = await UserModel.getById(id);
+            if (!existing) return res.status(404).json({ error: 'User not found' });
+
+            // Build a partial update object from provided fields only
+            const body = req.body || {};
+
+            const updatedUser = {};
+
+            if (Object.prototype.hasOwnProperty.call(body, 'name')) updatedUser.name = body.name;
+            if (Object.prototype.hasOwnProperty.call(body, 'email')) updatedUser.email = body.email;
+            if (Object.prototype.hasOwnProperty.call(body, 'address')) updatedUser.address = body.address;
+            if (Object.prototype.hasOwnProperty.call(body, 'city')) updatedUser.city = body.city;
+            if (Object.prototype.hasOwnProperty.call(body, 'state_province')) updatedUser.state_province = body.state_province;
+            if (Object.prototype.hasOwnProperty.call(body, 'postal_code')) updatedUser.postal_code = body.postal_code;
+            if (Object.prototype.hasOwnProperty.call(body, 'country')) updatedUser.country = body.country;
+
+            if (Object.prototype.hasOwnProperty.call(body, 'password')) {
+                const password = body.password;
+                if (!PASSWORD_REGEX.test(password)) {
+                    return res.status(400).json({
+                        error: 'Password must be at least 8 characters long and include at least one uppercase letter and one number.'
+                    });
+                }
+                updatedUser.password = await bcrypt.hash(password, 10);
+            }
+            const affected = await UserModel.updateUser(id, updatedUser);
             if (!affected) return res.status(404).json({ error: 'User not found' });
-            res.json({ message: 'User updated successfully' });
+
+            // fetch and return the updated user (omit password)
+            const newUser = await UserModel.getById(id);
+            const safeUser = {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                address: newUser.address,
+                city: newUser.city,
+                state_province: newUser.state_province,
+                postal_code: newUser.postal_code,
+                country: newUser.country,
+            };
+
+            res.json({ message: 'User updated successfully', user: safeUser });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
