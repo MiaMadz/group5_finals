@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const cafeRoutes = require('./routes/cafeRoutes');
@@ -10,6 +11,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); 
 
 app.use('/api/cafes', cafeRoutes);
 app.use('/api/users', userRoutes);

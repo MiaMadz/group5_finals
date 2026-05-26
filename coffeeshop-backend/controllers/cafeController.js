@@ -8,6 +8,8 @@ class CafeController {
             let limit = req.query.limit ? parseInt(req.query.limit) : 20;
             const city = req.query.city || '';
             const type = req.query.type || '';
+            const name = req.query.name || '';
+            const country = req.query.country || '';
             const isUserShop = req.query.is_user_shop !== undefined
                 ? req.query.is_user_shop === '1' || req.query.is_user_shop === 'true'
                 : null;
@@ -16,7 +18,7 @@ class CafeController {
                 limit = 100;
             }
 
-            const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop);
+            const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop, name, country);
             res.json(cafes);
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -28,8 +30,9 @@ class CafeController {
             const city    = req.query.city  || '';
             const type    = req.query.type  || '';
             const country = req.query.country || '';
+            const name    = req.query.name  || '';
 
-            const total = await CafeModel.getCountModel(city, type, country);
+            const total = await CafeModel.getCountModel(city, type, country, name);
             res.json({ total });
         } catch (err) {
             res.status(500).json({ error: err.message });
@@ -48,8 +51,25 @@ class CafeController {
 
     static async addCafe(req, res) {
         try {
-            const result = await CafeModel.addCafe(req.body);
-            res.json({ message: 'Cafe added successfully', id: result.insertId });
+            const businessPermitName = req.file
+                ? req.file.filename
+                : (req.body.businessPermitName || null);
+
+            const businessPermitPath = req.file
+                ? `/uploads/permits/${req.file.filename}`
+                : null;
+
+            const result = await CafeModel.addCafe({
+                ...req.body,
+                businessPermitName,
+                businessPermitPath,
+            });
+
+            res.json({
+                message: 'Cafe added successfully',
+                id: result.insertId,
+                businessPermitPath,
+            });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }
