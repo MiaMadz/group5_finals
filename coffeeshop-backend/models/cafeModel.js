@@ -1,7 +1,7 @@
 const db = require('../config/db');
 
 class CafeModel {
-    static async getAllModel(page = 1, limit = 20, city = '', type = '', isUserShop = null, name = '', country = '') {
+    static async getAllModel(page = 1, limit = 20, city = '', type = '', isUserShop = null, name = '', country = '', addedBy = null) {
         const offset = (page - 1) * limit;
         let query = 'SELECT * FROM cafes_tbl WHERE 1=1';
         const params = [];
@@ -26,6 +26,10 @@ class CafeModel {
             query += ' AND country = ?';
             params.push(country);
         }
+        if (addedBy !== null && addedBy !== '') {
+            query += ' AND added_by = ?';
+            params.push(addedBy);
+        }
 
         query += ' LIMIT ? OFFSET ?';
         params.push(limit, offset);
@@ -34,7 +38,7 @@ class CafeModel {
         return rows;
     }
 
-    static async getCountModel(city = '', type = '', country = '', name = '') {
+    static async getCountModel(city = '', type = '', country = '', name = '', isUserShop = null, addedBy = null) {
         let query = 'SELECT COUNT(*) AS total FROM cafes_tbl WHERE 1=1';
         const params = [];
 
@@ -53,6 +57,14 @@ class CafeModel {
         if (name) {
             query += ' AND name LIKE ?';
             params.push(`%${name}%`);
+        }
+        if (isUserShop !== null) {
+            query += ' AND is_user_shop = ?';
+            params.push(isUserShop ? 1 : 0);
+        }
+        if (addedBy !== null && addedBy !== '') {
+            query += ' AND added_by = ?';
+            params.push(addedBy);
         }
 
         const [rows] = await db.query(query, params);
@@ -108,12 +120,41 @@ class CafeModel {
     }
 
     static async updateCafe(cafe) {
-        const { id, name, address, city, state_province, postal_code, country } = cafe;
+        const { id } = cafe;
+        const sets = [];
+        const params = [];
+        const fieldMap = {
+            name: 'name',
+            address: 'address',
+            city: 'city',
+            state_province: 'state_province',
+            postal_code: 'postal_code',
+            country: 'country',
+            brewery_type: 'brewery_type',
+            phone: 'phone',
+            website_url: 'website_url',
+            directions_url: 'directions_url',
+            is_user_shop: 'is_user_shop',
+        };
+
+        for (const [key, column] of Object.entries(fieldMap)) {
+            if (Object.prototype.hasOwnProperty.call(cafe, key)) {
+                sets.push(`${column} = ?`);
+                const value = key === 'is_user_shop' ? (cafe[key] ? 1 : 0) : cafe[key];
+                params.push(value);
+            }
+        }
+
+        if (sets.length === 0) {
+            return 0;
+        }
+
+        params.push(id);
         const [results] = await db.query(
             `UPDATE cafes_tbl 
-             SET name = ?, address = ?, city = ?, state_province = ?, postal_code = ?, country = ? 
+             SET ${sets.join(', ')} 
              WHERE id = ?`,
-            [name, address, city, state_province, postal_code, country, id]
+            params
         );
         return results.affectedRows;
     }

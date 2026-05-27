@@ -18,6 +18,8 @@ export default function ExplorePage() {
     const [type, setType] = useState('')
     const [page, setPage] = useState(1)
     const [selectedLocation, setSelectedLocation] = useState(null)
+    const [nearMe, setNearMe] = useState(false)
+    const [userCity, setUserCity] = useState('')
 
     const favorites = useSelector((state) => state.favorites?.items || [])
     const userShops = useSelector((state) => state.userShops?.items || [])
@@ -51,6 +53,28 @@ export default function ExplorePage() {
         fetchUserShops()
     }, [API_URL])
 
+    useEffect(() => {
+        const loadCurrentUserCity = async () => {
+            try {
+                const storedUser = window.localStorage.getItem('currentUser')
+                if (!storedUser) return
+
+                const currentUser = JSON.parse(storedUser)
+                const userId = currentUser.id || currentUser._id
+                if (!userId) return
+
+                const response = await fetch(`${API_URL}/api/users/${encodeURIComponent(userId)}`)
+                if (!response.ok) return
+                const data = await response.json()
+                setUserCity(data.city || '')
+            } catch (error) {
+                console.error('Unable to load current user city:', error)
+            }
+        }
+
+        loadCurrentUserCity()
+    }, [API_URL])
+
     const allUserShops = [...dbUserShops, ...userShops]
 
     const uniqueUserShops = Array.from(
@@ -62,24 +86,43 @@ export default function ExplorePage() {
 
     const breweries = cafes || []
 
+    const getNearMeMatch = (location) => {
+        if (!nearMe || !userCity.trim()) return true
+        const cityTerm = userCity.trim().toLowerCase()
+        return [location.city, location.state_province, location.address, location.name]
+            .filter(Boolean)
+            .some((text) => text.toLowerCase().includes(cityTerm))
+    }
+
     const filteredUserShops = uniqueUserShops.filter((shop) => {
         const matchesSearch = !search ||
             shop.name?.toLowerCase().includes(search.toLowerCase()) ||
             shop.address?.toLowerCase().includes(search.toLowerCase())
         const matchesCountry = !country || shop.country?.toLowerCase() === country.toLowerCase()
         const matchesType = !type || shop.brewery_type === type
-        return matchesSearch && matchesCountry && matchesType
+        const matchesNearMe = getNearMeMatch(shop)
+        return matchesSearch && matchesCountry && matchesType && matchesNearMe
     })
 
     const totalFromApi = countData?.total ?? 0
     const totalCount = Math.max(0, totalFromApi)
     const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE))
 
-    const displayedBreweries = breweries
+    const displayedBreweries = breweries.filter(getNearMeMatch)
 
     const handleFilterChange = (setter) => (value) => {
         setter(value)
         setPage(1)
+    }
+
+    const handleNearMeClick = () => {
+        if (!userCity.trim()) return
+        setNearMe(true)
+        setPage(1)
+    }
+
+    const handleClearNearMe = () => {
+        setNearMe(false)
     }
 
     const handleSelectBrewery = (brewery) => {
@@ -91,7 +134,7 @@ export default function ExplorePage() {
         }
     }
 
-    const mappableBreweries = breweries.filter((b) => b.latitude && b.longitude)
+    const mappableBreweries = displayedBreweries.filter((b) => b.latitude && b.longitude)
     const mappableUserShops = filteredUserShops.filter((b) => b.latitude && b.longitude)
 
     return (
@@ -125,8 +168,8 @@ export default function ExplorePage() {
                 </aside>
                 <main className="list-panel">
                     <div className="panel-card panel-card--list">
-                        <div className="search-bar-section">
-                            <div className="search-input-wrapper">
+                            <div className="search-bar-section" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
+                            <div className="search-input-wrapper" style={{ flex: '1 1 320px' }}>
                                 <input
                                     type="text"
                                     className="search-input"
@@ -138,8 +181,16 @@ export default function ExplorePage() {
                                     }}
                                 />
                             </div>
+                            <button
+                                type="button"
+                                className={`btn h-12 px-5 text-sm ${nearMe ? 'btn-secondary' : 'btn-primary'}`}
+                                onClick={() => nearMe ? handleClearNearMe() : handleNearMeClick()}
+                                disabled={!userCity.trim()}
+                            >
+                                {nearMe ? 'Near me: on' : 'Near me'}
+                            </button>
                         </div>
-                        <div className="panel-card__controls">
+                        <div className="panel-card__controls" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center' }}>
                             <Filters
                                 country={country}
                                 type={type}
@@ -151,7 +202,10 @@ export default function ExplorePage() {
                             <div>
                                 <h2>Brewery results</h2>
                             </div>
-                            <p className="meta-copy">{displayedBreweries.length} locations</p>
+                            <div>
+                                <p className="meta-copy">{displayedBreweries.length} locations</p>
+
+                            </div>
                         </div>
 
                         <div className="brewery-list-wrapper">

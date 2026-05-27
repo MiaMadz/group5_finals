@@ -9,13 +9,14 @@ import { Heart, Plus } from 'lucide-react'
 export default function Navbar() {
     const pathname = usePathname()
     const [mounted, setMounted] = useState(false)
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
     const favorites = useSelector((state) => state.favorites?.items || [])
+
     useEffect(() => { 
         setMounted(true)
+        const storedUser = window.localStorage.getItem('currentUser')
+        setIsLoggedIn(!!storedUser)
     }, [])
-
-    // derive login state directly from localStorage to avoid stale state
-    const isLoggedIn = typeof window !== 'undefined' && !!localStorage.getItem('currentUser')
 
     const navLink = (to, label) => (
         <Link href={to} style={{

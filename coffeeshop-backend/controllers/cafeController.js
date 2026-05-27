@@ -10,6 +10,7 @@ class CafeController {
             const country = req.query.country || '';
             const type = req.query.type || '';
             const name = req.query.name || '';
+            const addedBy = req.query.added_by || null;
             const isUserShop = req.query.is_user_shop !== undefined
                 ? req.query.is_user_shop === '1' || req.query.is_user_shop === 'true'
                 : null;
@@ -18,7 +19,7 @@ class CafeController {
                 limit = 100;
             }
 
-            const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop, name, country);
+            const cafes = await CafeModel.getAllModel(page, limit, city, type, isUserShop, name, country, addedBy);
             res.json(cafes);
         } catch (err) {
             res.status(500).json({ error: err.message });

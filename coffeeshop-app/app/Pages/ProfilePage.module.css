@@ -33,10 +33,13 @@
   padding: 18px;
 }
 
+/* ── Fixed-size card — sized to fit Manage Shops (the largest view) ── */
 .profileCard {
   position: relative;
   z-index: 0;
   width: min(960px, 100%);
+  /* Fixed height: tall enough for the shop list + edit panel */
+  height: 780px;
   background: rgba(28, 15, 10, 0.85);
   border: 1px solid rgba(201, 120, 42, 0.3);
   border-radius: 28px;
@@ -53,6 +56,7 @@
   box-shadow: 0 42px 110px rgba(0, 0, 0, 0.36), 0 16px 32px rgba(0, 0, 0, 0.2);
 }
 
+/* ── Sidebar ── */
 .sidebar {
   flex: 0 0 200px;
   border-right: 1px solid rgba(201, 120, 42, 0.2);
@@ -81,9 +85,11 @@
   padding-left: 32px;
 }
 
-.sidebarItem:first-child {
-  color: #E8A94D;
-  background: rgba(201, 120, 42, 0.1);
+/* Active sidebar item — replaces the old hard-coded :first-child rule */
+.sidebarItemActive {
+  color: #E8A94D !important;
+  background: rgba(201, 120, 42, 0.15) !important;
+  padding-left: 32px;
 }
 
 .logout {
@@ -96,13 +102,101 @@
   color: #FF8787;
 }
 
+.logoutView {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.logoutActions {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.actionGroup {
+  padding: 20px;
+  background: rgba(201, 120, 42, 0.05);
+  border: 1px solid rgba(201, 120, 42, 0.15);
+  border-radius: 12px;
+}
+
+.actionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f5efe6;
+  margin: 0 0 8px 0;
+}
+
+.actionDesc {
+  font-size: 13px;
+  color: #999;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.logoutButton {
+  padding: 10px 20px;
+  background: rgba(201, 120, 42, 0.6);
+  border: 1px solid #C9782A;
+  border-radius: 6px;
+  color: #f5efe6;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+  background: rgba(201, 120, 42, 0.8);
+  box-shadow: 0 4px 12px rgba(201, 120, 42, 0.2);
+}
+
+.deleteButton {
+  padding: 10px 20px;
+  background: rgba(255, 107, 107, 0.15);
+  border: 1px solid #FF6B6B;
+  border-radius: 6px;
+  color: #FF8787;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.deleteButton:hover {
+  background: rgba(255, 107, 107, 0.25);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+}
+
+/* ── Main content area — scrolls internally so card stays fixed size ── */
 .profileMain {
   flex: 1;
   padding: 40px;
-  overflow: visible;
-  max-height: none;
+  overflow-y: auto;
+  /* Custom scrollbar to match theme */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 120, 42, 0.4) transparent;
 }
 
+.profileMain::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profileMain::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profileMain::-webkit-scrollbar-thumb {
+  background: rgba(201, 120, 42, 0.4);
+  border-radius: 3px;
+}
+
+.profileMain::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 120, 42, 0.65);
+}
+
+/* ── Profile header ── */
 .profileHeader {
   margin-bottom: 32px;
   padding-bottom: 24px;
@@ -125,6 +219,7 @@
   font-family: 'Inter', sans-serif;
 }
 
+/* ── Form ── */
 .formTitle {
   font-size: 18px;
   font-weight: 600;
@@ -221,9 +316,236 @@
   font-family: 'Inter', sans-serif;
 }
 
+/* ── Manage Shops layout ── */
+.shopsLayout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.shopListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.shopCount {
+  font-size: 12px;
+  color: #999;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.addShopBtn {
+  background: rgba(201, 120, 42, 0.15);
+  border: 1px solid rgba(201, 120, 42, 0.4);
+  color: #E8A94D;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.addShopBtn:hover {
+  background: rgba(201, 120, 42, 0.3);
+}
+
+.shopEmpty {
+  font-size: 13px;
+  color: #777;
+  font-family: 'Inter', sans-serif;
+  padding: 12px 0;
+}
+
+/* Scrollable shop list so it doesn't push the card taller */
+.shopScrollList {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 120, 42, 0.3) transparent;
+}
+
+.shopScrollList::-webkit-scrollbar {
+  width: 4px;
+}
+
+.shopScrollList::-webkit-scrollbar-thumb {
+  background: rgba(201, 120, 42, 0.35);
+  border-radius: 2px;
+}
+
+.shopItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(201, 120, 42, 0.15);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.shopItem:hover {
+  background: rgba(201, 120, 42, 0.05);
+}
+
+.shopItemActive {
+  border-color: #C9782A;
+  background: rgba(201, 120, 42, 0.1);
+}
+
+.shopItemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.shopItemType {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #888;
+  margin: 0 0 2px 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.shopItemName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #f5efe6;
+  margin: 0 0 2px 0;
+  font-family: 'Playfair Display', serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shopItemAddress {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.shopItemActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.editBtn {
+  background: rgba(201, 120, 42, 0.12);
+  border: 1px solid rgba(201, 120, 42, 0.35);
+  color: #E8A94D;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s ease;
+}
+
+.editBtn:hover {
+  background: rgba(201, 120, 42, 0.25);
+}
+
+.deleteBtn {
+  background: rgba(255, 107, 107, 0.08);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+  color: #FF8787;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s ease;
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 107, 107, 0.18);
+}
+
+.shopEditPanel {
+  border-left: 1px solid rgba(201, 120, 42, 0.15);
+  padding-left: 24px;
+}
+
+.shopEditActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cancelBtn {
+  padding: 12px 28px;
+  background: transparent;
+  border: 1px solid #C9782A;
+  border-radius: 6px;
+  color: #d0d0d0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-end;
+  font-family: 'Playfair Display', serif;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.cancelBtn:hover {
+  border-color: #C9782A;
+  color: #f5efe6;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 5, 3, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 24px;
+}
+
+.modalBox {
+  width: min(480px, 100%);
+  background: rgba(28, 15, 10, 0.95);
+  border: 1px solid rgba(201, 120, 42, 0.3);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.deleteConfirmBtn {
+  background: rgba(220, 60, 60, 0.7) !important;
+  border-color: #DC3C3C !important;
+}
+
+.deleteConfirmBtn:hover {
+  background: rgba(220, 60, 60, 0.9) !important;
+}
+
+/* ── Mobile ── */
 @media (max-width: 768px) {
   .profileCard {
     flex-direction: column;
+    height: auto;
+    min-height: 780px;
   }
 
   .sidebar {
@@ -241,12 +563,23 @@
     font-size: 14px;
   }
 
-  .profileMain {
-    padding: 24px;
-    max-height: none;
+  .sidebarItem:hover,
+  .sidebarItemActive {
+    padding-left: 16px;
   }
 
-  .profileName {
-    font-size: 22px;
+  .profileMain {
+    padding: 24px;
+  }
+
+  .shopsLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .shopEditPanel {
+    border-left: none;
+    border-top: 1px solid rgba(201, 120, 42, 0.15);
+    padding-left: 0;
+    padding-top: 20px;
   }
 }
