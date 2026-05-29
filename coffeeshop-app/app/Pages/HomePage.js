@@ -11,6 +11,70 @@ const COUNTRIES = [
   'Belgium', 'Germany', 'Israel', 'Netherlands', 'Spain'];
 const BREWERY_TYPES = ['micro', 'nano', 'regional', 'brewpub', 'large', 'planning', 'bar', 'contract', 'proprietor', 'taproom', 'closed'];
 
+const reviewsCSS = `
+  .reviews-section {
+    background: #1a0f0a;
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .reviews-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(180, 100, 20, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(180, 100, 20, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .reviews-section__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers contents vertically stacked */
+    text-align: center;
+  }
+  .reviews-section__header {
+    margin-bottom: 2.5rem;
+  }
+  .reviews-section__title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    color: #f5e6d3;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+  .reviews-section__cta {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .btn-submit-review {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+    color: #e8a44a;
+    border: 1.5px solid #e8a44a;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .btn-submit-review:hover {
+    background: #e8a44a;
+    color: #1a0f0a;
+  }
+`;
+
 export default function HomePage() {
   const dispatch = useDispatch();
   const favorites = useSelector((state) => state.favorites.items || []);
@@ -28,6 +92,8 @@ export default function HomePage() {
 
   return (
     <div className="sipsync-home">
+      <style>{reviewsCSS}</style>
+
       <section className="hero">
         <div className="hero__bg" />
         <div className="hero__grain" />
@@ -92,6 +158,8 @@ export default function HomePage() {
         />
       </div>
 
+      <CustomerReviews />
+
       <Footer />
     </div>
   );
@@ -151,6 +219,22 @@ function CountrySection({ country, index, handleScroll, favorites, onToggleFavor
             })}
           </div>
           <button className="carousel-btn carousel-btn--right" onClick={() => handleScroll('right', index)} aria-label="Scroll right">›</button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CustomerReviews() {
+  return (
+    <section className="reviews-section">
+      <div className="reviews-section__inner">
+        <div className="reviews-section__header">
+          <h2 className="reviews-section__title">Customer Reviews</h2>
+        </div>
+        
+        <div className="reviews-section__cta">
+          <Link href="/Review" className="btn-submit-review">Submit a Review</Link>
         </div>
       </div>
     </section>
