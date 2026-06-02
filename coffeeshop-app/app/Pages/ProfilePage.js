@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.css';
 
@@ -27,6 +28,7 @@ export default function ProfilePage() {
   const [profileSuccess, setProfileSuccess] = useState('');
 
   const [shops, setShops] = useState([]);
+  const userShops = useSelector((state) => state.userShops?.items || []);
   const [shopsLoading, setShopsLoading] = useState(false);
   const [shopsError, setShopsError] = useState('');
   const [shopsSuccess, setShopsSuccess] = useState('');
@@ -86,6 +88,20 @@ export default function ProfilePage() {
       loadShops(userId);
     }
   }, [activeView, user]);
+
+  const displayedShops = useMemo(() => {
+    const seen = new Map();
+    shops.forEach((shop) => {
+      seen.set(String(shop.id), shop);
+    });
+    userShops.forEach((shop) => {
+      const key = String(shop.id);
+      if (!seen.has(key)) {
+        seen.set(key, shop);
+      }
+    });
+    return Array.from(seen.values());
+  }, [shops, userShops]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -350,7 +366,7 @@ export default function ProfilePage() {
                   {/* Shop list */}
                   <div className={styles.shopList}>
                     <div className={styles.shopListHeader}>
-                      <span className={styles.shopCount}>{shops.length} shop{shops.length !== 1 ? 's' : ''}</span>
+                      <span className={styles.shopCount}>{displayedShops.length} shop{displayedShops.length !== 1 ? 's' : ''}</span>
                       <button type="button" className={styles.addShopBtn} onClick={() => router.push('/AddShop')}>
                         + Add New
                       </button>
@@ -358,11 +374,11 @@ export default function ProfilePage() {
 
                     {shopsLoading ? (
                       <p className={styles.shopEmpty}>Loading your shops…</p>
-                    ) : shops.length === 0 ? (
+                    ) : displayedShops.length === 0 ? (
                       <p className={styles.shopEmpty}>No shops yet. Add one to get started.</p>
                     ) : (
                       <div className={styles.shopScrollList}>
-                        {shops.map((shop) => (
+                        {displayedShops.map((shop) => (
                           <div
                             key={shop.id}
                             className={`${styles.shopItem} ${Number(editingShopId) === Number(shop.id) ? styles.shopItemActive : ''}`}

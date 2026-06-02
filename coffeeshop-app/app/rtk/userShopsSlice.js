@@ -9,7 +9,7 @@ const userShopsSlice = createSlice({
         addShop: (state, action) => {
             const shop = {
                 ...action.payload,
-                id: `shop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                id: action.payload.id ?? `shop_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             }
             state.items.push(shop)
         },
