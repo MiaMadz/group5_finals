@@ -183,7 +183,7 @@ export default function ExplorePage() {
                             </div>
                             <button
                                 type="button"
-                                className={`btn h-12 px-5 text-sm ${nearMe ? 'btn-secondary' : 'btn-primary'}`}
+                                className={`btn h-12 px-5 text-sm ${nearMe ? 'btn-secondary' : 'btn-secondary1'}`}
                                 onClick={() => nearMe ? handleClearNearMe() : handleNearMeClick()}
                                 disabled={!userCity.trim()}
                             >

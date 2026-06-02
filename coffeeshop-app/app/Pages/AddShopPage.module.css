@@ -312,22 +312,23 @@
 
 .submitBtn {
     padding: 14px 20px;
-    background: linear-gradient(180deg, #f0b75f 0%, #d18b2c 100%);
-    color: #12110d;
-    border: none;
-    border-radius: 16px;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: 'Playfair Display', serif;
-    letter-spacing: 0.4px;
+    background: rgba(201, 120, 42, 0.7);
+    border: 1px solid #C9782A;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-top: 10px;
+    margin-top: 16px;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 0.5px;
 }
 
 .submitBtn:hover:not(:disabled) {
+    background: rgba(201, 120, 42, 0.9);
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(232, 169, 77, 0.3);
+    box-shadow: 0 4px 12px rgba(201, 120, 42, 0.3);
 }
 
 @media (max-width: 950px) {

@@ -2,9 +2,30 @@ const ReviewModel = require('../models/reviewModel');
 
 class ReviewController {
     static async getByCafeId(req, res) {
+    try {
+        const cafe_id = req.params.cafeId;
+        const reviews = await ReviewModel.getByCafeId(cafe_id);
+        res.json(reviews);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+    static async getAllRecent(req, res) {
         try {
-            const reviews = await ReviewModel.getByCafeId(req.params.cafe_id);
+            const limit = req.query.limit ? parseInt(req.query.limit) : 12;
+            const reviews = await ReviewModel.getAllRecent(limit);
             res.json(reviews);
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    }
+
+    static async getSummary(req, res) {
+        try {
+            const cafe_id = req.params.cafeId || req.params.cafe_id;
+            const summary = await ReviewModel.getSummary(cafe_id);
+            res.json({ summary });
         } catch (err) {
             res.status(500).json({ error: err.message });
         }

@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchBreweriesQuery, useGetBreweryCountQuery, useGetCountryCountQuery } from '../rtk/breweryApi';
 import { toggleFavorite } from '../rtk/favoritesSlice';
@@ -10,70 +11,6 @@ const COUNTRIES = [
   'Portugal', 'Isle of Man', 'Austria', 'France', 'Singapore',
   'Belgium', 'Germany', 'Israel', 'Netherlands', 'Spain'];
 const BREWERY_TYPES = ['micro', 'nano', 'regional', 'brewpub', 'large', 'planning', 'bar', 'contract', 'proprietor', 'taproom', 'closed'];
-
-const reviewsCSS = `
-  .reviews-section {
-    background: #1a0f0a;
-    padding: 5rem 0;
-    position: relative;
-    overflow: hidden;
-  }
-  .reviews-section::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 20% 50%, rgba(180, 100, 20, 0.06) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(180, 100, 20, 0.04) 0%, transparent 50%);
-    pointer-events: none;
-  }
-  .reviews-section__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centers contents vertically stacked */
-    text-align: center;
-  }
-  .reviews-section__header {
-    margin-bottom: 2.5rem;
-  }
-  .reviews-section__title {
-    font-size: clamp(2.5rem, 5vw, 4rem);
-    font-weight: 800;
-    color: #f5e6d3;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    text-transform: uppercase;
-    margin: 0;
-  }
-  .reviews-section__cta {
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-  }
-  .btn-submit-review {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: transparent;
-    color: #e8a44a;
-    border: 1.5px solid #e8a44a;
-    border-radius: 8px;
-    padding: 0.75rem 2rem;
-    font-size: 0.9rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
-  }
-  .btn-submit-review:hover {
-    background: #e8a44a;
-    color: #1a0f0a;
-  }
-`;
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -92,8 +29,6 @@ export default function HomePage() {
 
   return (
     <div className="sipsync-home">
-      <style>{reviewsCSS}</style>
-
       <section className="hero">
         <div className="hero__bg" />
         <div className="hero__grain" />
@@ -143,11 +78,7 @@ export default function HomePage() {
           onToggleFavorite={(brewery) => dispatch(toggleFavorite(brewery))}
         />
 
-        <div className="country-divider">
-          <div className="country-divider__line" />
-          <span className="country-divider__label">More countries</span>
-          <div className="country-divider__line" />
-        </div>
+        <div className="country-divider"></div>
 
         <CountrySection
           country={COUNTRIES[1]}
@@ -157,8 +88,6 @@ export default function HomePage() {
           onToggleFavorite={(brewery) => dispatch(toggleFavorite(brewery))}
         />
       </div>
-
-      <CustomerReviews />
 
       <Footer />
     </div>
@@ -226,16 +155,170 @@ function CountrySection({ country, index, handleScroll, favorites, onToggleFavor
 }
 
 function CustomerReviews() {
+  const [reviews, setReviews] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  const CARD_WIDTH = 280;
+  const CARD_GAP = 16;
+  const STEP = CARD_WIDTH + CARD_GAP;
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE}/api/reviews/all/recent?limit=12`);
+        if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
+        const data = await response.json();
+        setReviews(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error fetching reviews:', err);
+        setReviews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, [API_BASE]);
+
+  // Continuously scroll one card every 3s
+  useEffect(() => {
+    if (reviews.length === 0 || isPaused) return;
+    const interval = setInterval(() => {
+      setOffset((prev) => {
+        const maxOffset = (reviews.length - 3) * STEP;
+        if (prev >= maxOffset) return 0;
+        return prev + STEP;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [reviews.length, isPaused, STEP]);
+
+  if (loading || reviews.length === 0) return null;
+
+  // Duplicate reviews for seamless looping
+  const displayReviews = [...reviews, ...reviews];
+
   return (
     <section className="reviews-section">
+      <style>{`
+        .reviews-track-wrapper {
+          width: 100%;
+          max-width: 920px;
+          overflow: hidden;
+          position: relative;
+        }
+        .reviews-track-wrapper::before,
+        .reviews-track-wrapper::after {
+          content: '';
+          position: absolute;
+          top: 0; bottom: 0;
+          width: 60px;
+          z-index: 2;
+          pointer-events: none;
+        }
+        .reviews-track-wrapper::before { left: 0; background: linear-gradient(to right, #1a0f0a, transparent); }
+        .reviews-track-wrapper::after  { right: 0; background: linear-gradient(to left,  #1a0f0a, transparent); }
+        .reviews-track {
+          display: flex;
+          gap: 16px;
+          transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .review-mini-card {
+          flex: 0 0 280px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(232,164,74,0.2);
+          border-radius: 12px;
+          padding: 1.25rem;
+          cursor: pointer;
+          transition: border-color 0.2s, transform 0.2s;
+          display: flex;
+          flex-direction: column;
+          gap: 0.6rem;
+        }
+        .review-mini-card:hover {
+          border-color: rgba(232,164,74,0.5);
+          transform: translateY(-3px);
+        }
+        .review-mini-cafe {
+          font-size: 0.7rem;
+          color: #e8a44a;
+          font-weight: 700;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .review-mini-text {
+          font-size: 0.85rem;
+          line-height: 1.5;
+          color: #f5e6d3;
+          font-family: Georgia, serif;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .review-mini-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding-top: 0.6rem;
+          border-top: 1px solid rgba(232,164,74,0.1);
+        }
+        .review-mini-author {
+          font-size: 0.75rem;
+          color: rgba(245,230,211,0.7);
+        }
+        .review-mini-stars {
+          font-size: 0.75rem;
+          color: #e8a44a;
+          letter-spacing: 1px;
+        }
+      `}</style>
+
       <div className="reviews-section__inner">
         <div className="reviews-section__header">
           <h2 className="reviews-section__title">Customer Reviews</h2>
         </div>
-        
-        <div className="reviews-section__cta">
-          <Link href="/Review" className="btn-submit-review">Submit a Review</Link>
+
+        <div
+          className="reviews-track-wrapper"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div
+            className="reviews-track"
+            style={{ transform: `translateX(-${offset}px)` }}
+          >
+            {displayReviews.map((review, idx) => (
+              <div
+                key={`${review.id}-${idx}`}
+                className="review-mini-card"
+                onClick={() => {
+                  window.location.href = `/Review?cafe_id=${encodeURIComponent(review.cafe_id)}`;
+                }}
+              >
+                <div className="review-mini-cafe">{review.cafe_name}</div>
+                <p className="review-mini-text">"{review.review_text}"</p>
+                <div className="review-mini-footer">
+                  <span className="review-mini-author">— {review.user_name || 'Anonymous'}</span>
+                  <span className="review-mini-stars">
+                    {'★'.repeat(review.stars)}{'☆'.repeat(5 - review.stars)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+        
+        <div className="footer__banner-content">
+          <h2 className="footer__banner-title">Discover more and find the perfect spot for your next cup.</h2>
+        </div>
+        <Link href="/Explore" className="btn-primary">Explore More Brews →</Link>
       </div>
     </section>
   );
@@ -244,13 +327,9 @@ function CustomerReviews() {
 function Footer() {
   return (
     <footer className="footer">
-      <div className="footer__banner">
-        <div className="footer__banner-bg" />
-        <div className="footer__banner-content">
-          <h2 className="footer__banner-title">Discover more and find the<br/>perfect spot for your next cup.</h2>
-          <Link href="/Explore" className="btn-primary">Explore More Brews →</Link>
-        </div>
-      </div>
+
+      <CustomerReviews />
+
       <div className="footer__bottom">
         <div className="footer__links">
           {['Privacy Policy', 'Terms of Service', 'Contact'].map((label) => (

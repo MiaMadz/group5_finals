@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleFavorite } from '../rtk/favoritesSlice'
 
@@ -55,6 +56,7 @@ export default function BreweryCard({ brewery, onSelect }) {
                     <a className="btn btn-secondary" href={brewery.website_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Website</a>
                 )}
                 <a className="btn btn-secondary" href={directionsUrl} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>Directions</a>
+                <Link href={`/Review?cafe_id=${brewery.id}`} onClick={(e) => e.stopPropagation()} className="btn btn-secondary">Reviews</Link>
             </div>
         </li>
     )
