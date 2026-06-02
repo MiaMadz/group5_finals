@@ -137,8 +137,7 @@ export default function ProfilePage() {
   const handleEditClick = (shop) => {
     setShopsError('');
     setShopsSuccess('');
-    // Force to number to avoid SQL type mismatch
-    setEditingShopId(Number(shop.id));
+    setEditingShopId(shop.id);
     setFormData({
       shopName: shop.name || '',
       address: shop.address || '',
@@ -183,7 +182,10 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
-      const shopId = Number(editingShopId);
+      const shopId = String(editingShopId);
+      if (!shopId || Number.isNaN(Number(shopId))) {
+        throw new Error('Unable to edit this shop because it does not have a valid server ID.');
+      }
       const payload = {
         name: formData.shopName.trim(),
         address: formData.address.trim(),
@@ -232,7 +234,10 @@ export default function ProfilePage() {
     setIsSaving(true);
     setShopsError('');
     try {
-      const shopId = Number(confirmDeleteShop.id);
+      const shopId = String(confirmDeleteShop.id);
+      if (!shopId || Number.isNaN(Number(shopId))) {
+        throw new Error('Unable to delete this shop because it does not have a valid server ID.');
+      }
       const response = await fetch(`${API_URL}/api/cafes/${shopId}`, { method: 'DELETE' });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Unable to delete shop');
@@ -241,7 +246,7 @@ export default function ProfilePage() {
       const currentUserStr = localStorage.getItem('currentUser');
       const currentUser = JSON.parse(currentUserStr);
       await loadShops(currentUser.id || currentUser._id);
-      if (editingShopId === Number(confirmDeleteShop.id)) handleCancelEdit();
+      if (String(editingShopId) === String(confirmDeleteShop.id)) handleCancelEdit();
     } catch (err) {
       console.error(err);
       setShopsError(err.message || 'Unable to delete shop.');
@@ -381,7 +386,7 @@ export default function ProfilePage() {
                         {displayedShops.map((shop) => (
                           <div
                             key={shop.id}
-                            className={`${styles.shopItem} ${Number(editingShopId) === Number(shop.id) ? styles.shopItemActive : ''}`}
+                            className={`${styles.shopItem} ${String(editingShopId) === String(shop.id) ? styles.shopItemActive : ''}`}
                           >
                             <div className={styles.shopItemInfo}>
                               <p className={styles.shopItemType}>{shop.brewery_type || 'Coffee Shop'}</p>
