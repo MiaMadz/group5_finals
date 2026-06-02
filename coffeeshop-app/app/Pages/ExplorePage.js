@@ -98,7 +98,9 @@ export default function ExplorePage() {
     const filteredUserShops = uniqueUserShops.filter((shop) => {
         const matchesSearch = !search ||
             shop.name?.toLowerCase().includes(search.toLowerCase()) ||
-            shop.address?.toLowerCase().includes(search.toLowerCase())
+            shop.address?.toLowerCase().includes(search.toLowerCase()) ||
+            shop.city?.toLowerCase().includes(search.toLowerCase()) ||
+            shop.state_province?.toLowerCase().includes(search.toLowerCase())
         const matchesCountry = !country || shop.country?.toLowerCase() === country.toLowerCase()
         const matchesType = !type || shop.brewery_type === type
         const matchesNearMe = getNearMeMatch(shop)
@@ -110,6 +112,8 @@ export default function ExplorePage() {
     const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE))
 
     const displayedBreweries = breweries.filter(getNearMeMatch)
+    const displayedUserShops = filteredUserShops
+    const totalResults = displayedBreweries.length + displayedUserShops.length
 
     const handleFilterChange = (setter) => (value) => {
         setter(value)
@@ -204,8 +208,7 @@ export default function ExplorePage() {
                                 <h2>Brewery results</h2>
                             </div>
                             <div>
-                                <p className="meta-copy">{displayedBreweries.length} locations</p>
-
+                                <p className="meta-copy">{totalResults} locations</p>
                             </div>
                         </div>
 
@@ -215,16 +218,25 @@ export default function ExplorePage() {
                                     <p style={{ padding: '1rem' }}>Loading...</p>
                                 ) : isError ? (
                                     <p style={{ padding: '1rem' }}>Failed to load breweries.</p>
-                                ) : displayedBreweries.length === 0 ? (
+                                ) : totalResults === 0 ? (
                                     <p style={{ padding: '1rem' }}>No results found.</p>
                                 ) : (
-                                    displayedBreweries.map((brewery) => (
-                                        <BreweryCard
-                                            key={brewery.id}
-                                            brewery={brewery}
-                                            onSelect={() => handleSelectBrewery(brewery)}
-                                        />
-                                    ))
+                                    <>
+                                        {displayedBreweries.map((brewery) => (
+                                            <BreweryCard
+                                                key={brewery.id}
+                                                brewery={brewery}
+                                                onSelect={() => handleSelectBrewery(brewery)}
+                                            />
+                                        ))}
+                                        {displayedUserShops.map((shop) => (
+                                            <BreweryCard
+                                                key={shop.id}
+                                                brewery={shop}
+                                                onSelect={() => handleSelectBrewery(shop)}
+                                            />
+                                        ))}
+                                    </>
                                 )}
                             </ul>
                         </div>
