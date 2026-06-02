@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import styles from './ProfilePage.module.css';
+import { updateShop, deleteShop } from '../rtk/userShopsSlice';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -15,6 +16,7 @@ const initialFormData = {
 
 export default function ProfilePage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [activeView, setActiveView] = useState('profile');
 
   const [user, setUser] = useState(null);
@@ -183,8 +185,27 @@ export default function ProfilePage() {
     setIsSaving(true);
     try {
       const shopId = String(editingShopId);
+      // if the shop doesn't have a numeric server-side id, update local Redux store instead
       if (!shopId || Number.isNaN(Number(shopId))) {
-        throw new Error('Unable to edit this shop because it does not have a valid server ID.');
+        const updatedShop = {
+          id: editingShopId,
+          name: formData.shopName.trim(),
+          address: formData.address.trim(),
+          city: formData.city.trim(),
+          state_province: formData.stateProvince.trim(),
+          postal_code: formData.postalCode.trim(),
+          country: formData.country.trim(),
+          brewery_type: formData.shopType,
+          phone: formData.phone.trim(),
+          website_url: formData.websiteUrl.trim(),
+          directions_url: formData.directionsUrl.trim(),
+          isUserShop: 1,
+        };
+        dispatch(updateShop(updatedShop));
+        setShopsSuccess('Shop updated locally.');
+        handleCancelEdit();
+        setIsSaving(false);
+        return;
       }
       const payload = {
         name: formData.shopName.trim(),
@@ -235,8 +256,14 @@ export default function ProfilePage() {
     setShopsError('');
     try {
       const shopId = String(confirmDeleteShop.id);
+      // if the shop doesn't have a numeric server id, delete from Redux only
       if (!shopId || Number.isNaN(Number(shopId))) {
-        throw new Error('Unable to delete this shop because it does not have a valid server ID.');
+        dispatch(deleteShop(confirmDeleteShop.id));
+        setShopsSuccess(`Deleted shop "${confirmDeleteShop.name}" locally.`);
+        setConfirmDeleteShop(null);
+        if (String(editingShopId) === String(confirmDeleteShop.id)) handleCancelEdit();
+        setIsSaving(false);
+        return;
       }
       const response = await fetch(`${API_URL}/api/cafes/${shopId}`, { method: 'DELETE' });
       const data = await response.json().catch(() => ({}));

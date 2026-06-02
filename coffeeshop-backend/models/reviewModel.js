@@ -62,6 +62,11 @@ class ReviewModel {
         const [result] = await db.query('DELETE FROM reviews_tbl WHERE id = ?', [id]);
         return result.affectedRows;
     }
+
+    static async deleteByUser(userId) {
+        const [result] = await db.query('DELETE FROM reviews_tbl WHERE user_id = ?', [userId]);
+        return result.affectedRows;
+    }
 }
 
 module.exports = ReviewModel;

@@ -1,4 +1,5 @@
 const UserModel = require('../models/userModel');
+const ReviewModel = require('../models/reviewModel');
 const bcrypt = require('bcrypt');
 
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
@@ -112,6 +113,8 @@ class UserController {
 
     static async deleteUser(req, res) {
         try {
+            // remove dependent reviews first to satisfy foreign key constraints
+            await ReviewModel.deleteByUser(req.params.id);
             const affected = await UserModel.deleteUser(req.params.id);
             if (!affected) return res.status(404).json({ error: 'User not found' });
             res.json({ message: 'User deleted successfully' });
