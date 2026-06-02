@@ -1,9 +1,13 @@
 'use client'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleFavorite } from '../rtk/favoritesSlice'
 
+const ratingSummaryCache = new Map();
+
 export default function BreweryCard({ brewery, onSelect }) {
+    const [ratingSummary, setRatingSummary] = useState(() => ratingSummaryCache.get(brewery?.id) || null)
     const dispatch = useDispatch()
     const isFavorited = useSelector(state =>
         state.favorites.items.some(b => b.id === brewery.id)
@@ -22,12 +26,45 @@ export default function BreweryCard({ brewery, onSelect }) {
 
     const fullAddress = [address, city, state, postalCode].filter(Boolean).join(', ')
 
+    useEffect(() => {
+        if (!brewery?.id) return
+        if (ratingSummaryCache.has(brewery.id)) {
+            setRatingSummary(ratingSummaryCache.get(brewery.id))
+            return
+        }
+
+        const controller = new AbortController()
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+
+        fetch(`${API_URL}/api/reviews/cafe/${brewery.id}/summary`, { signal: controller.signal })
+            .then((res) => res.ok ? res.json() : null)
+            .then((data) => {
+                if (!data?.summary) return
+                ratingSummaryCache.set(brewery.id, data.summary)
+                setRatingSummary(data.summary)
+            })
+            .catch((err) => {
+                if (err.name !== 'AbortError') {
+                    console.error('Unable to load review summary:', err)
+                }
+            })
+
+        return () => controller.abort()
+    }, [brewery?.id])
+
     return (
         <li className="brewery-card" onClick={onSelect} style={{ cursor: onSelect ? 'pointer' : 'default' }}>
             <div className="brewery-card__header">
                 <div>
                     <h3>{brewery.name}</h3>
-                    <span className="brewery-type-pill">{brewery.brewery_type || 'Unknown'}</span>
+                    <div className="brewery-type-row">
+                        <span className="brewery-type-pill">{brewery.brewery_type || 'Unknown'}</span>
+                        {ratingSummary && (
+                            <span className="brewery-rating" title={`${ratingSummary.average > 0 ? ratingSummary.average.toFixed(1) : '0.0'} average rating`}>
+                                <span className="brewery-rating-value">{ratingSummary.average > 0 ? ratingSummary.average.toFixed(1) : '0.0'}</span>
+                            </span>
+                        )}
+                    </div>
                 </div>
                 <button
                     type="button"

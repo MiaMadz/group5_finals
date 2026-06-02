@@ -201,7 +201,6 @@ export default function AddShopPage() {
         if (!currentUser) { setError('You must be logged in to add a shop.'); return }
         if (!formData.businessPermit) { setError('A photo of your business permit is required'); return }
 
-        // Verify permit with Tesseract OCR
         try {
             setIsVerifying(true)
             const info = await verifyBusinessPermit(formData.businessPermit)
@@ -233,7 +232,6 @@ export default function AddShopPage() {
                 formData.country.trim()
             )
 
-            // Use FormData to send file + shop data together
             const form = new FormData()
             form.append('name', formData.shopName.trim())
             form.append('address', formData.address.trim())
@@ -253,7 +251,7 @@ export default function AddShopPage() {
 
             const res = await fetch(`${API_URL}/api/cafes`, {
                 method: 'POST',
-                body: form, // No Content-Type header — browser sets it automatically
+                body: form, 
             })
 
             const saved = await res.json()

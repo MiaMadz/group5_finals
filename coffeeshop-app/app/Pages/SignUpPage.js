@@ -8,7 +8,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 export default function SignUpPage() {
-  // page always visible; removed floating/show button and close control
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,8 +18,6 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const router = useRouter();
-
-  // close handler removed
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -72,7 +69,6 @@ export default function SignUpPage() {
     }
   };
 
-  // always render the page
 
   return (
     <main className={styles.loginPage}>
@@ -80,7 +76,6 @@ export default function SignUpPage() {
         <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <h1 className={styles.loginTitle}>Sign Up</h1>
-            {/* close button removed */}
           </div>
 
           <form className={styles.loginForm} onSubmit={handleSignUp}>

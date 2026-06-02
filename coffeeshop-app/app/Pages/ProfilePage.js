@@ -242,7 +242,6 @@ export default function ProfilePage() {
       <section className={styles.profileContent}>
         <div className={styles.profileCard}>
 
-          {/* Sidebar */}
           <div className={styles.sidebar}>
             <button
               className={`${styles.sidebarItem} ${activeView === 'profile' ? styles.sidebarItemActive : ''}`}
@@ -264,10 +263,8 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Main panel */}
           <div className={styles.profileMain}>
 
-            {/* PROFILE VIEW */}
             {activeView === 'profile' && (
               <>
                 <div className={styles.profileHeader}>
@@ -303,7 +300,6 @@ export default function ProfilePage() {
               </>
             )}
 
-            {/* LOGOUT VIEW */}
             {activeView === 'logout' && (
               <div className={styles.logoutView}>
                 <div className={styles.profileHeader}>
@@ -340,7 +336,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* MANAGE SHOPS VIEW */}
             {activeView === 'shops' && (
               <>
                 <div className={styles.profileHeader}>
@@ -387,7 +382,6 @@ export default function ProfilePage() {
                     )}
                   </div>
 
-                  {/* Edit panel */}
                   <div className={styles.shopEditPanel}>
                     <h3 className={styles.formTitle}>{editingShopId ? 'Edit shop' : 'Select a shop to edit'}</h3>
                     {!editingShopId ? (
@@ -448,7 +442,6 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* Delete account confirmation modal */}
       {logoutConfirm && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
@@ -483,7 +476,6 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Delete shop modal */}
       {confirmDeleteShop && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>

@@ -7,7 +7,6 @@ import styles from './LoginPage.module.css';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function LoginPage() {
-  // page always visible; removed floating/show button and close control
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -73,11 +72,9 @@ export default function LoginPage() {
       return;
     }
 
-    // This is a client-side placeholder until a reset endpoint is implemented.
     setSuccess('If an account exists for that email, a reset link has been sent.');
   };
 
-  // always render the page
 
   return (
     <main className={styles.loginPage}>
@@ -85,7 +82,6 @@ export default function LoginPage() {
         <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <h1 className={styles.loginTitle}>Login</h1>
-            {/* close button removed */}
           </div>
 
           <form

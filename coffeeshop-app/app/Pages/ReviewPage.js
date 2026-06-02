@@ -34,7 +34,6 @@ export default function ReviewPage() {
     const [formData, setFormData]           = useState({ rating: 0, review: '' });
     const [hoveredRating, setHoveredRating] = useState(0);
 
-    // ── fetch summary + reviews ───────────────────────────────────────────────
     const fetchData = useCallback(async () => {
         if (!cafeId) return;
         console.log('=== fetchData called with cafeId:', cafeId);
@@ -46,7 +45,7 @@ export default function ReviewPage() {
                 fetch(`${API_BASE}/api/reviews/cafe/${cafeId}/summary`),
                 fetch(`${API_BASE}/api/reviews/cafe/${cafeId}`),
             ]);
-            console.log('summary status:', summaryRes.status); // add this
+            console.log('summary status:', summaryRes.status);
             console.log('reviews status:', reviewsRes.status);
             if (summaryRes.ok) {
                 const summaryJson = await summaryRes.json();
@@ -66,7 +65,6 @@ export default function ReviewPage() {
         }
     }, [cafeId]);
 
-    // ── fetch cafe details ────────────────────────────────────────────────────
     const fetchCafeDetails = useCallback(async () => {
         if (!cafeId) return;
         setLoadingCafe(true);
@@ -83,7 +81,6 @@ export default function ReviewPage() {
         }
     }, [cafeId]);
 
-    // ── bootstrap: read URL params + localStorage ─────────────────────────────
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const params    = new URLSearchParams(window.location.search);
@@ -102,7 +99,6 @@ export default function ReviewPage() {
     useEffect(() => { fetchData(); },        [fetchData]);
     useEffect(() => { fetchCafeDetails(); }, [fetchCafeDetails]);
 
-    // ── submit ────────────────────────────────────────────────────────────────
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError('');
@@ -152,7 +148,6 @@ export default function ReviewPage() {
         <div className={styles.container}>
             <div className={styles.inner}>
 
-                {/* ── Cafe Header ─────────────────────────────────────────── */}
                 {loadingCafe ? (
                     <div className={styles.cafeHeaderSkeleton}>Loading cafe details…</div>
                 ) : cafeDetails ? (
@@ -204,7 +199,6 @@ export default function ReviewPage() {
                     </div>
                 ) : null}
 
-                {/* ── Rating Summary ──────────────────────────────────────── */}
                 <div className={styles.summaryGrid}>
                     <div className={styles.summaryStats}>
                         {summary.breakdown.map((row) => (
@@ -232,7 +226,6 @@ export default function ReviewPage() {
                     </div>
                 </div>
 
-                {/* ── Review Form ─────────────────────────────────────────── */}
                 <div className={styles.formSection}>
                     <h2 className={styles.formTitle}>Add a Review</h2>
                     <form onSubmit={handleSubmit} className={styles.form}>
@@ -291,7 +284,6 @@ export default function ReviewPage() {
                     </form>
                 </div>
 
-                {/* ── Existing Reviews ────────────────────────────────────── */}
                 <div className={styles.reviewsSection}>
                     <h2 className={styles.reviewsTitle}>Customer Reviews</h2>
                     {loadingPage ? (
