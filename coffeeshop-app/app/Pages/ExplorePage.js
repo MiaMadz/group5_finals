@@ -31,9 +31,10 @@ export default function ExplorePage() {
     if (type) params.type = type
     if (search) params.name = search
     if (country) params.country = country
+    if (nearMe && userCity) params.city = userCity
 
     const { data: cafes = [], isLoading, isError } = useGetCafesQuery(params)
-    const { data: countData } = useGetBreweryCountQuery({ type, country, name: search })
+    const { data: countData } = useGetBreweryCountQuery({ type, country, name: search, ...(nearMe && userCity && { city: userCity }) })
 
     useEffect(() => {
         const fetchUserShops = async () => {

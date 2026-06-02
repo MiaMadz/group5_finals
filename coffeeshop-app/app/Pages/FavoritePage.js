@@ -130,12 +130,8 @@ export default function FavoritePage() {
                             </div>
                             <button
                                 type="button"
-                                className={`btn h-12 px-5 text-sm ${nearMe ? 'btn-secondary' : 'btn-primary'}`}
-                                onClick={() => {
-                                    if (!userCity.trim()) return
-                                    setNearMe((prev) => !prev)
-                                    setPage(1)
-                                }}
+                                className={`btn h-12 px-5 text-sm ${nearMe ? 'btn-secondary' : 'btn-secondary1'}`}
+                                onClick={() => nearMe ? handleClearNearMe() : handleNearMeClick()}
                                 disabled={!userCity.trim()}
                             >
                                 {nearMe ? 'Near me: on' : 'Near me'}
