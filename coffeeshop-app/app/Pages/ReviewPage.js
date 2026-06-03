@@ -183,19 +183,6 @@ export default function ReviewPage() {
                                 </a>
                             )}
                         </div>
-
-                        {/* inline overall rating strip */}
-                        <div className={styles.cafeRatingStrip}>
-                            <span className={styles.cafeRatingNum}>
-                                {summary.average > 0 ? summary.average.toFixed(1) : '—'}
-                            </span>
-                            <div className={styles.cafeRatingStars}>
-                                {renderStars(Math.round(summary.average), 'w-4 h-4')}
-                            </div>
-                            <span className={styles.cafeRatingCount}>
-                                {summary.total} {summary.total === 1 ? 'review' : 'reviews'}
-                            </span>
-                        </div>
                     </div>
                 ) : null}
 
