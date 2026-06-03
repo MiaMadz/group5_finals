@@ -202,7 +202,7 @@ export default function ProfilePage() {
           isUserShop: 1,
         };
         dispatch(updateShop(updatedShop));
-        setShopsSuccess('Shop updated locally.');
+        setShopsSuccess('Shop updated.');
         handleCancelEdit();
         setIsSaving(false);
         return;
@@ -259,7 +259,7 @@ export default function ProfilePage() {
       // if the shop doesn't have a numeric server id, delete from Redux only
       if (!shopId || Number.isNaN(Number(shopId))) {
         dispatch(deleteShop(confirmDeleteShop.id));
-        setShopsSuccess(`Deleted shop "${confirmDeleteShop.name}" locally.`);
+        setShopsSuccess(`Deleted shop "${confirmDeleteShop.name}".`);
         setConfirmDeleteShop(null);
         if (String(editingShopId) === String(confirmDeleteShop.id)) handleCancelEdit();
         setIsSaving(false);
